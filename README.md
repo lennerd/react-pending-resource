@@ -16,21 +16,28 @@ It is still in beta and not fully battle tested yet. A dedicated page with more 
 
 ## Example
 
-```jsx
-import React, { Suspense } from 'react';
+```tsx
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { usePromise } from 'react-pending-resource';
+
+async function fetchPost(id) {
+  // … fetch a post by id
+}
 
 function BlogPost({ id }) {
-  // Load post by id. Show loading spinner after 200 ms
-  const post = usePendingPromise(id, () => fetchPost(id), { timeout: 200 });
+  const post = usePromise(id, () => fetchPost(id));
 
   return <div>{post.title}</div>
 }
 
 function App() {
   return (
-    <Suspense fallback="Loading …">
-      <BlogPost />
-    </Suspense>
+    <React.Suspense fallback="Loading …">
+      <BlogPost id={1} />
+    </React.Suspense>
   );
 }
+
+ReactDOM.render(<App />, document.getElementById('root'));
 ```
