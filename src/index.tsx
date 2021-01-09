@@ -6,7 +6,9 @@ import ResourceCache, {
 } from './ResourceCache';
 import ResourceTracker from './ResourceTracker';
 import useIsPending from './useIsPending';
-import usePendingPromise from './usePendingPromise';
+import usePendingPromise, {
+  UsePendingPromiseOptions,
+} from './usePendingPromise';
 import usePendingResource, {
   UsePendingResourceOptions,
 } from './usePendingResource';
@@ -31,6 +33,7 @@ export {
   ResourceTracker,
   useIsPending,
   usePendingPromise,
+  UsePendingPromiseOptions,
   usePendingResource,
   UsePendingResourceOptions,
   usePromise,

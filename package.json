@@ -3,6 +3,7 @@
   "author": "Lennart Hildebrandt",
   "description": "Async and suspending resource hooks for React",
   "version": "0.1.0",
+  "repository": "https://github.com/lennerd/react-resource",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",

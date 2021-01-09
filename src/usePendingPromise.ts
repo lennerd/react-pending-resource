@@ -4,7 +4,8 @@ import usePendingResource, {
 } from './usePendingResource';
 import useResourceCache from './useResourceCache';
 
-interface UsePendingPromiseOptions<T> extends UsePendingResourceOptions<T> {
+export interface UsePendingPromiseOptions<T>
+  extends UsePendingResourceOptions<T> {
   deps?: any[];
 }
 
