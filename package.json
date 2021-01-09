@@ -1,9 +1,9 @@
 {
-  "name": "react-resource",
+  "name": "react-pending-resource",
   "author": "Lennart Hildebrandt",
-  "description": "Async and suspending resource hooks for React",
+  "description": "React hooks for loading and suspending async resources",
   "version": "0.1.0",
-  "repository": "https://github.com/lennerd/react-resource",
+  "repository": "https://github.com/lennerd/react-pending-resource",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -37,14 +37,14 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "module": "dist/react-resource.esm.js",
+  "module": "dist/react-pending-resource.esm.js",
   "size-limit": [
     {
-      "path": "dist/react-resource.cjs.production.min.js",
+      "path": "dist/react-pending-resource.cjs.production.min.js",
       "limit": "10 KB"
     },
     {
-      "path": "dist/react-resource.esm.js",
+      "path": "dist/react-pending-resource.esm.js",
       "limit": "10 KB"
     }
   ],

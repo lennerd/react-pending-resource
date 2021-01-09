@@ -1,8 +1,8 @@
-# React Resource
+# React Pending Resource
 
-![CI Status](https://github.com/lennerd/react-resource/workflows/CI/badge.svg)
+![CI Status](https://github.com/lennerd/react-pending-resource/workflows/CI/badge.svg)
 
-React Resource is a small library of hooks for async resource loading.
+React Pending Resource is a small library of hooks for async resource loading.
 It is still in beta and not fully battle tested yet. A dedicated page with more examples and documentation coming soon.
 
 ## Why another async hook library for React?
