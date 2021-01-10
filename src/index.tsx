@@ -1,7 +1,9 @@
-import Resource, { createResource } from './Resource';
+import Resource, {
+  createResource,
+  ResourceKey,
+  isValidResourceKey,
+} from './Resource';
 import ResourceCache, {
-  ResourceCacheKey,
-  isResourceCacheKey,
   ResourceCacheInvalidationCallback,
 } from './ResourceCache';
 import ResourceTracker from './ResourceTracker';
@@ -19,16 +21,17 @@ import useResourceConfig, {
   ResourceConfig,
   ResourceConfigProvider,
 } from './useResourceConfig';
+import useResourcePreloading from './useResourcePreloading';
 import useResourceTracker, {
   ResourceTrackerProvider,
 } from './useResourceTracker';
 
 export {
   Resource,
+  ResourceKey,
+  isValidResourceKey,
   createResource,
   ResourceCache,
-  ResourceCacheKey,
-  isResourceCacheKey,
   ResourceCacheInvalidationCallback,
   ResourceTracker,
   useIsPending,
@@ -43,6 +46,7 @@ export {
   useResourceConfig,
   ResourceConfig,
   ResourceConfigProvider,
+  useResourcePreloading,
   useResourceTracker,
   ResourceTrackerProvider,
 };
