@@ -154,7 +154,7 @@ describe('usePendingPromise', () => {
     expect(result.current).toEqual([valueB, false]);
   });
 
-  it('uses preloaded resources with same dependencies', async () => {
+  it('uses preloaded resources', async () => {
     expect.assertions(2);
 
     const cacheKey = 'cacheKey';
@@ -165,42 +165,10 @@ describe('usePendingPromise', () => {
       .mockImplementationOnce(() => Promise.resolve(value))
       .mockImplementationOnce(() => Promise.resolve('never'));
 
-    resourceCache.preload(cacheKey, callback, [dependency]);
-
-    const { result, waitForNextUpdate } = renderHook(
-      () => usePendingPromise(cacheKey, callback, [dependency]),
-      {
-        wrapper({ children }) {
-          return (
-            <ResourceCacheProvider cache={resourceCache}>
-              {children}
-            </ResourceCacheProvider>
-          );
-        },
-      }
-    );
-
-    expect(result.current).toEqual([undefined, true]);
-
-    await waitForNextUpdate();
-
-    expect(result.current).toEqual([value, false]);
-  });
-
-  it('skips preloaded resources', async () => {
-    expect.assertions(2);
-
-    const cacheKey = 'cacheKey';
-    const value = 'value';
-    const callback = jest
-      .fn()
-      .mockImplementationOnce(() => Promise.resolve(value))
-      .mockImplementationOnce(() => Promise.resolve('never'));
-
     resourceCache.preload(cacheKey, callback);
 
     const { result, waitForNextUpdate } = renderHook(
-      () => usePendingPromise(cacheKey, callback),
+      () => usePendingPromise(cacheKey, callback, [dependency]),
       {
         wrapper({ children }) {
           return (

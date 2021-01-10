@@ -1,15 +1,13 @@
-import { ResourceCacheKey } from './ResourceCache';
+import { ResourceKey } from './Resource';
 import useResource from './useResource';
-import useResourceCache from './useResourceCache';
+import useResourcePreloading from './useResourcePreloading';
 
 export default function usePromise<T>(
-  cacheKey: ResourceCacheKey,
-  callback: () => Promise<T>,
+  cacheKey: ResourceKey,
+  callback: () => Promise<T> | T,
   deps?: any[]
 ): T {
-  const resourceCache = useResourceCache();
-  resourceCache.preload(cacheKey, callback, deps, { skipInitialDeps: true });
+  const resource = useResourcePreloading(cacheKey, callback, deps);
 
-  // Use cache key to take advantage of resource invalidation.
-  return useResource(cacheKey);
+  return useResource(resource);
 }

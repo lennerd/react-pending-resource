@@ -1,127 +1,27 @@
 import ResourceCache from '../src/ResourceCache';
 
 describe('ResourceCache', () => {
-  it('preloads different resources for different cache key', () => {
+  it('preloads new resource for same cache key', () => {
     const resourceCache = new ResourceCache();
-    const resourceA = resourceCache.preload(
-      'cacheKeyA',
-      () => Promise.resolve(),
-      []
-    );
-    const resourceB = resourceCache.preload(
-      'cacheKeyB',
-      () => Promise.resolve(),
-      []
-    );
+    const resourceA = resourceCache.preload('key', () => Promise.resolve());
+    const resourceB = resourceCache.preload('key', () => Promise.resolve());
 
     expect(resourceA).not.toBe(resourceB);
   });
 
-  it('preloads same resource for same cache key and without dependency array', () => {
+  it('preloads new resources for different cache key', () => {
     const resourceCache = new ResourceCache();
-    const resourceA = resourceCache.preload('cacheKey', () =>
-      Promise.resolve()
-    );
-    const resourceB = resourceCache.preload('cacheKey', () =>
-      Promise.resolve()
-    );
-
-    expect(resourceA).toBe(resourceB);
-  });
-
-  it('preloads different resources for different cache key and without dependency array', () => {
-    const resourceCache = new ResourceCache();
-    const resourceA = resourceCache.preload('cacheKeyA', () =>
-      Promise.resolve()
-    );
-    const resourceB = resourceCache.preload('cacheKeyB', () =>
-      Promise.resolve()
-    );
+    const resourceA = resourceCache.preload('keyA', () => Promise.resolve());
+    const resourceB = resourceCache.preload('keyB', () => Promise.resolve());
 
     expect(resourceA).not.toBe(resourceB);
   });
 
-  it('preloads same resource for same cache key and without dependency', () => {
-    const resourceCache = new ResourceCache();
-    const resourceA = resourceCache.preload(
-      'cacheKey',
-      () => Promise.resolve(),
-      []
-    );
-    const resourceB = resourceCache.preload(
-      'cacheKey',
-      () => Promise.resolve(),
-      []
-    );
-
-    expect(resourceA).toBe(resourceB);
-  });
-
-  it('preloads different resources for same cache key, but different dependency array', () => {
-    const resourceCache = new ResourceCache();
-    const resourceA = resourceCache.preload(
-      'cacheKey',
-      () => Promise.resolve(),
-      ['a']
-    );
-    const resourceB = resourceCache.preload(
-      'cacheKey',
-      () => Promise.resolve(),
-      ['b', 'c']
-    );
-
-    expect(resourceA).not.toBe(resourceB);
-  });
-
-  it('preloads same resource for same cache key and promise, but different dependency array', () => {
+  it('preloads same resource for same cache key and promise', () => {
     const resourceCache = new ResourceCache();
     const promise = Promise.resolve();
-    const resourceA = resourceCache.preload('cacheKey', () => promise, ['a']);
-    const resourceB = resourceCache.preload('cacheKey', () => promise, ['b']);
-
-    expect(resourceA).toBe(resourceB);
-  });
-
-  it('preloads different resources for same cache key, but without dependency array', () => {
-    const resourceCache = new ResourceCache();
-    const resourceA = resourceCache.preload('cacheKey', Promise.resolve());
-    const resourceB = resourceCache.preload('cacheKey', Promise.resolve());
-
-    expect(resourceA).not.toBe(resourceB);
-  });
-
-  it('preloads same resource for same cache key and promise, but without dependency array', () => {
-    const resourceCache = new ResourceCache();
-    const promise = Promise.resolve();
-    const resourceA = resourceCache.preload('cacheKey', promise);
-    const resourceB = resourceCache.preload('cacheKey', promise);
-
-    expect(resourceA).toBe(resourceB);
-  });
-
-  it('preloads different resources for same cache key, but with different promises and call signatures (promise, callback)', () => {
-    const resourceCache = new ResourceCache();
-    const resourceA = resourceCache.preload('cacheKey', Promise.resolve());
-    const resourceB = resourceCache.preload(
-      'cacheKey',
-      () => Promise.resolve(),
-      ['a']
-    );
-
-    expect(resourceA).not.toBe(resourceB);
-  });
-
-  it('preloads same resources for same cache key, but with different promises and call signatures (promise, callback) if dependency array is skipped', () => {
-    const resourceCache = new ResourceCache();
-    const resourceA = resourceCache.preload('cacheKey', Promise.resolve());
-    const resourceB = resourceCache.preload(
-      'cacheKey',
-      () => Promise.resolve(),
-      ['a'],
-      {
-        skipInitialDeps: true,
-      }
-    );
+    const resourceA = resourceCache.preload('key', promise);
+    const resourceB = resourceCache.preload('key', promise);
 
     expect(resourceA).toBe(resourceB);
   });
@@ -129,20 +29,16 @@ describe('ResourceCache', () => {
   it('preloads same resource for same cache key and promise, but with different call signatures (promise, callback)', () => {
     const resourceCache = new ResourceCache();
     const promise = Promise.resolve();
-    const resourceA = resourceCache.preload('cacheKey', promise);
-    const resourceB = resourceCache.preload('cacheKey', () => promise, []);
+    const resourceA = resourceCache.preload('key', promise);
+    const resourceB = resourceCache.preload('key', () => promise);
 
     expect(resourceA).toBe(resourceB);
   });
 
   it('preloads different resources for same cache key and promise, but with different call signatures (callback, promise)', () => {
     const resourceCache = new ResourceCache();
-    const resourceA = resourceCache.preload(
-      'cacheKey',
-      () => Promise.resolve(),
-      []
-    );
-    const resourceB = resourceCache.preload('cacheKey', Promise.resolve());
+    const resourceA = resourceCache.preload('key', () => Promise.resolve());
+    const resourceB = resourceCache.preload('key', Promise.resolve());
 
     expect(resourceA).not.toBe(resourceB);
   });
@@ -150,8 +46,8 @@ describe('ResourceCache', () => {
   it('preloads same resource for same cache key and promise, but with different call signatures (callback, promise)', () => {
     const resourceCache = new ResourceCache();
     const promise = Promise.resolve();
-    const resourceA = resourceCache.preload('cacheKey', () => promise, []);
-    const resourceB = resourceCache.preload('cacheKey', promise);
+    const resourceA = resourceCache.preload('key', () => promise);
+    const resourceB = resourceCache.preload('key', promise);
 
     expect(resourceA).toBe(resourceB);
   });
@@ -160,65 +56,34 @@ describe('ResourceCache', () => {
     jest.useFakeTimers();
 
     const resourceCache = new ResourceCache();
-    const resourceAFirst = resourceCache.preload(
-      'cacheKeyA',
-      () => Promise.resolve(),
-      ['a']
-    );
-    const resourceBFirst = resourceCache.preload(
-      'cacheKeyB',
-      () => Promise.resolve(),
-      ['b']
-    );
-    const resourceCFirst = resourceCache.preload(
-      'cacheKeyC',
-      () => Promise.resolve(),
-      ['c']
-    );
+    const resourceA = resourceCache.preload('keyA', () => Promise.resolve());
+    const resourceB = resourceCache.preload('keyB', () => Promise.resolve());
+    const resourceC = resourceCache.preload('keyC', () => Promise.resolve());
 
-    resourceAFirst.allocate();
-    resourceAFirst.free();
-    resourceBFirst.allocate();
+    resourceA.allocate();
+    resourceA.free();
+    resourceB.allocate();
 
     jest.runAllTimers();
 
-    const resourceASecond = resourceCache.preload(
-      'cacheKeyA',
-      () => Promise.resolve(),
-      ['a']
-    );
-    const resourceBSecond = resourceCache.preload(
-      'cacheKeyB',
-      () => Promise.resolve(),
-      ['b']
-    );
-    const resourceCSecond = resourceCache.preload(
-      'cacheKeyC',
-      () => Promise.resolve(),
-      ['c']
-    );
-    expect(resourceAFirst).not.toBe(resourceASecond);
-    expect(resourceBFirst).toBe(resourceBSecond);
-    expect(resourceCFirst).toBe(resourceCSecond);
+    expect(resourceCache.get('keyA')).not.toBe(resourceA);
+    expect(resourceCache.get('keyB')).toBe(resourceB);
+    expect(resourceCache.get('keyC')).toBe(resourceC);
   });
 
   it('notifies when preloading and invalidating', () => {
     const resourceCache = new ResourceCache();
     const callback = jest.fn();
-    resourceCache.subscribe('cacheKeyA', callback);
+    resourceCache.subscribe('keyA', callback);
 
-    const resourceAFirst = resourceCache.preload(
-      'cacheKeyA',
-      () => Promise.resolve(),
-      []
+    const resourceAFirst = resourceCache.preload('keyA', () =>
+      Promise.resolve()
     );
 
-    resourceCache.invalidate('cacheKeyA');
+    resourceCache.invalidate('keyA');
 
-    const resourceASecond = resourceCache.preload(
-      'cacheKeyA',
-      () => Promise.resolve(),
-      []
+    const resourceASecond = resourceCache.preload('keyA', () =>
+      Promise.resolve()
     );
 
     expect(resourceAFirst).not.toBe(resourceASecond);
@@ -230,21 +95,19 @@ describe('ResourceCache', () => {
     ]);
 
     callback.mockReset();
-    resourceCache.invalidate('cacheKeyB');
+    resourceCache.invalidate('keyB');
     expect(callback).not.toBeCalled();
 
-    resourceCache.unsubscribe('cacheKeyA', callback);
-    resourceCache.invalidate('cacheKeyA');
+    resourceCache.unsubscribe('keyA', callback);
+    resourceCache.invalidate('keyA');
     expect(callback).not.toBeCalled();
   });
 
-  it('gets preloaded resource or throws', () => {
+  it('gets preloaded resource or undefined', () => {
     const resourceCache = new ResourceCache();
-    const resourceA = resourceCache.preload('cacheKeyA', Promise.resolve());
+    const resourceA = resourceCache.preload('keyA', Promise.resolve());
 
-    expect(resourceCache.get('cacheKeyA')).toBe(resourceA);
-    expect(resourceCache.get('cacheKeyB')).toBe(undefined);
+    expect(resourceCache.get('keyA')).toBe(resourceA);
+    expect(resourceCache.get('keyB')).toBe(undefined);
   });
-
-  it('handles nested cache keys', () => {});
 });

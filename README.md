@@ -1,18 +1,20 @@
-# React Pending Resource
+# React Resource Hooks
 
 ![CI Status](https://github.com/lennerd/react-pending-resource/workflows/CI/badge.svg)
 
-React Pending Resource is a small library of hooks for async resource loading.
-It is still in beta and not fully battle tested yet. A dedicated page with more examples and documentation coming soon.
+React Resource Hooks is a small library of hooks for handling promises (for example when fetching data asynchronously).
+Though feature complete it is still in beta and not fully battle tested yet.
+A dedicated page with more information, examples and documentation coming soon.
 
 ## Why another async hook library for React?
 
-* Built with TypeScript
-* Powerful caching between components by using serializable cache keys
+* Powerful caching by using serializable cache keys
 * Easy refetching of resources by using cache keys and more complex dependencies if needed
 * Easy preloading of resources for better performance
-* Built around Suspense (without using experimental features)
+* Built around stable Suspense features (without using experimental APIs)
 * Easy deferring of rendering suspense fallbacks like loading spinners
+
+*This library cannot be used in components rendered on the server, as React Suspense does not support server side rendering yet.*
 
 ## Example
 

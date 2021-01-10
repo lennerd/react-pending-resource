@@ -7,13 +7,14 @@ import { ResourceCacheProvider } from '../src/useResourceCache';
 import { ResourceConfigProvider } from '../src/useResourceConfig';
 
 describe('usePendingResource', () => {
-  it('waiting for promise', async () => {
+  it('waites for promise', async () => {
     expect.assertions(2);
 
     jest.useFakeTimers();
 
     const value = 'test data';
     const resource = createResource(
+      'test resource',
       new Promise<string>(resolve => setTimeout(() => resolve(value), 1000))
     );
     const { result } = renderHook(() => usePendingResource(resource));
@@ -32,6 +33,7 @@ describe('usePendingResource', () => {
 
     const initialData = 'initial data';
     const resource = createResource(
+      'test resource',
       new Promise<string>(resolve => setTimeout(() => resolve('value'), 1000))
     );
     const { result } = renderHook(() =>
@@ -48,6 +50,7 @@ describe('usePendingResource', () => {
 
     const value = 'some data';
     const resource = createResource(
+      'some resource',
       new Promise<string>(resolve => setTimeout(() => resolve(value), 1000))
     );
     const { result, waitForNextUpdate } = renderHook(() =>
@@ -103,7 +106,10 @@ describe('usePendingResource', () => {
   });
 
   it('throws error', async () => {
-    const resource = createResource(Promise.reject(new Error()));
+    const resource = createResource(
+      'rejected resource',
+      Promise.reject(new Error())
+    );
     const { result, waitForNextUpdate } = renderHook(() =>
       usePendingResource(resource)
     );
@@ -120,6 +126,7 @@ describe('usePendingResource', () => {
 
     const value = 'test value';
     const resource = createResource(
+      'test resource',
       new Promise(resolve => setTimeout(() => resolve(value), 1000))
     );
     const { result, waitForNextUpdate } = renderHook(() =>
@@ -148,6 +155,7 @@ describe('usePendingResource', () => {
     const value = 'test value';
 
     const resource = createResource(
+      'test resource',
       new Promise(resolve => setTimeout(() => resolve(value), 1000))
     );
     const { result, waitForNextUpdate } = renderHook(

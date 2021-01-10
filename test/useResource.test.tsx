@@ -17,7 +17,7 @@ describe('useResource', () => {
 
     const value = 'resolved data';
     const promise = Promise.resolve(value);
-    const resource = createResource(promise);
+    const resource = createResource('resolved resource', promise);
 
     const { result, waitForNextUpdate } = renderHook(() =>
       useResource(resource)
@@ -63,7 +63,7 @@ describe('useResource', () => {
     expect.assertions(2);
 
     const value = 'value';
-    let resource = createResource(Promise.resolve(value));
+    let resource = createResource('resolved value', Promise.resolve(value));
 
     const { result, waitForNextUpdate, rerender } = renderHook(() =>
       useResource(resource)
@@ -72,7 +72,7 @@ describe('useResource', () => {
     await waitForNextUpdate();
     expect(result.current).toBe(value);
 
-    resource = createResource(Promise.reject(new Error()));
+    resource = createResource('rejected value', Promise.reject(new Error()));
     rerender();
 
     await waitForNextUpdate();
@@ -118,7 +118,7 @@ describe('useResource', () => {
     expect.assertions(3);
 
     const promise = Promise.resolve();
-    const resource = createResource(promise);
+    const resource = createResource('attach detach', promise);
 
     const { waitForNextUpdate, unmount } = renderHook(() =>
       useResource(resource)

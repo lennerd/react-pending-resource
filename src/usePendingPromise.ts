@@ -1,8 +1,8 @@
-import { ResourceCacheKey } from './ResourceCache';
+import { ResourceKey } from './Resource';
 import usePendingResource, {
   UsePendingResourceOptions,
 } from './usePendingResource';
-import useResourceCache from './useResourceCache';
+import useResourcePreloading from './useResourcePreloading';
 
 export interface UsePendingPromiseOptions<T>
   extends UsePendingResourceOptions<T> {
@@ -10,7 +10,7 @@ export interface UsePendingPromiseOptions<T>
 }
 
 export default function usePendingPromise<T>(
-  cacheKey: ResourceCacheKey,
+  cacheKey: ResourceKey,
   callback: () => T | Promise<T>,
   depsOrOptions?:
     | any[]
@@ -19,24 +19,20 @@ export default function usePendingPromise<T>(
 ): [T, boolean];
 
 export default function usePendingPromise<T>(
-  cacheKey: ResourceCacheKey,
+  cacheKey: ResourceKey,
   callback: () => T | Promise<T>,
   depsOrOptions?: any[] | UsePendingPromiseOptions<T>
 ): [T | undefined, boolean];
 
 export default function usePendingPromise<T>(
-  cacheKey: ResourceCacheKey,
+  cacheKey: ResourceKey,
   callback: () => T | Promise<T>,
   depsOrOptions?: any[] | UsePendingPromiseOptions<T>
 ): [T | undefined, boolean] {
   const options = Array.isArray(depsOrOptions)
     ? { deps: depsOrOptions }
     : depsOrOptions ?? {};
+  const resource = useResourcePreloading(cacheKey, callback, options.deps);
 
-  const resourceCache = useResourceCache();
-  resourceCache.preload(cacheKey, callback, options.deps, {
-    skipInitialDeps: true,
-  });
-
-  return usePendingResource(cacheKey, options);
+  return usePendingResource(resource, options);
 }

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import isPromise from './utils/isPromise';
-import Resource from './Resource';
-import { ResourceCacheKey } from './ResourceCache';
+import Resource, { ResourceKey } from './Resource';
 import useResource from './useResource';
 import useResourceConfig, { ResourceConfig } from './useResourceConfig';
 
@@ -12,18 +11,18 @@ export interface UsePendingResourceOptions<T> extends ResourceConfig {
 }
 
 export default function usePendingResource<T = any>(
-  resourceOrCacheKey: Resource<T> | ResourceCacheKey,
+  resourceOrKey: Resource<T> | ResourceKey,
   options?: ({ initialRender: false } | { initialData: T }) &
     UsePendingResourceOptions<T>
 ): [T, boolean];
 
 export default function usePendingResource<T = any>(
-  resourceOrCacheKey: Resource<T> | ResourceCacheKey,
+  resourceOrKey: Resource<T> | ResourceKey,
   options?: UsePendingResourceOptions<T>
 ): [T | undefined, boolean];
 
 export default function usePendingResource<T = any>(
-  resourceOrCacheKey: Resource<T> | ResourceCacheKey,
+  resourceOrKey: Resource<T> | ResourceKey,
   options: UsePendingResourceOptions<T> = {}
 ): [T | undefined, boolean] {
   const { timeout, initialRender = true, initialData = NO_DATA } = {
@@ -38,8 +37,11 @@ export default function usePendingResource<T = any>(
   let isPending = false;
 
   try {
+    // Linter is complaining about useResource being called conditionally.
+    // This try-catch block is necessary to make sure other hooks are always
+    // called and to be able to defer promise suspension.
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    data = useResource(resourceOrCacheKey);
+    data = useResource(resourceOrKey);
   } catch (errorOrPromise) {
     if (isPromise(errorOrPromise)) {
       promise = errorOrPromise;

@@ -29,7 +29,7 @@ describe('useIsPending', () => {
     });
 
     act(() => {
-      resourceTracker.add(createResource(promise));
+      resourceTracker.add(createResource('test', promise));
     });
 
     expect(result.current).toBe(true);
@@ -58,6 +58,7 @@ describe('useIsPending', () => {
     });
 
     const resource = createResource(
+      'test',
       new Promise(resolve => {
         setTimeout(resolve, 1000);
       })

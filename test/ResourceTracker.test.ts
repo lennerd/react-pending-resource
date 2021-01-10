@@ -14,16 +14,19 @@ describe('ResourceTracker', () => {
     jest.useFakeTimers();
 
     const resourceA = createResource(
+      'test A',
       new Promise(resolve => {
         setTimeout(resolve, 500);
       })
     );
     const resourceB = createResource(
+      'test B',
       new Promise(resolve => {
         setTimeout(resolve, 1000);
       })
     );
     const resourceC = createResource(
+      'test C',
       new Promise(resolve => {
         setTimeout(resolve, 1500);
       })
@@ -39,13 +42,13 @@ describe('ResourceTracker', () => {
     expect(callback).toBeCalledTimes(2);
 
     jest.advanceTimersByTime(500);
-    await new Promise(resolve => process.nextTick(resolve));
+    await nextTick();
 
     expect(resourceTracker.isPending()).toBe(true);
     expect(callback).toBeCalledTimes(3);
 
     jest.advanceTimersByTime(500);
-    await new Promise(resolve => process.nextTick(resolve));
+    await nextTick();
 
     expect(resourceTracker.isPending()).toBe(false);
     expect(callback).toBeCalledTimes(4);
@@ -57,10 +60,10 @@ describe('ResourceTracker', () => {
     expect(callback).toBeCalledTimes(4);
   });
 
-  it('only adds resource once', async () => {
+  it('only adds resource once', () => {
     jest.useFakeTimers();
 
-    const resource = createResource(Promise.resolve());
+    const resource = createResource('only once', Promise.resolve());
 
     resourceTracker.add(resource);
     resourceTracker.add(resource);
@@ -69,4 +72,38 @@ describe('ResourceTracker', () => {
     resourceTracker.remove(resource);
     expect(resourceTracker.isPending()).toBe(false);
   });
+
+  it('does not add rejected resource', async () => {
+    expect.assertions(1);
+
+    const resource = createResource('rejected', Promise.resolve());
+
+    await nextTick();
+
+    resourceTracker.add(resource);
+    expect(resourceTracker.isPending()).toBe(false);
+  });
+
+  it('stops pending if promise throws', async () => {
+    expect.assertions(2);
+
+    const resource = createResource(
+      'rejected',
+      Promise.resolve().then(() => {
+        throw new Error();
+      })
+    );
+
+    resourceTracker.add(resource);
+
+    expect(resourceTracker.isPending()).toBe(true);
+
+    await nextTick();
+
+    expect(resourceTracker.isPending()).toBe(false);
+  });
 });
+
+function nextTick(): Promise<void> {
+  return new Promise(resolve => process.nextTick(resolve));
+}

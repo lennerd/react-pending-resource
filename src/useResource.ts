@@ -1,38 +1,34 @@
 import { useEffect, useRef } from 'react';
 import isPromise from './utils/isPromise';
 import useForceUpdate from './utils/useForceUpdate';
-import Resource from './Resource';
-import {
-  createResourceCacheHash,
-  isResourceCacheKey,
-  ResourceCacheKey,
-} from './ResourceCache';
+import Resource, { isValidResourceKey, ResourceKey } from './Resource';
+import { createResourceCacheHash } from './ResourceCache';
 import useResourceCache from './useResourceCache';
 import useResourceTracker from './useResourceTracker';
 
 export default function useResource<T = any>(
-  resourceOrCacheKey: Resource<T> | ResourceCacheKey
+  resourceOrCacheKey: Resource<T> | ResourceKey
 ): T {
   const forceUpdate = useForceUpdate();
   const resourceCache = useResourceCache();
-  let resource: Resource<T> | undefined;
-  let cacheKey: ResourceCacheKey | undefined;
+  let resource: Resource<T>;
 
   let data: T;
   let promise: Promise<any> | undefined;
   let error: any;
 
-  if (isResourceCacheKey(resourceOrCacheKey)) {
-    cacheKey = resourceOrCacheKey;
-    resource = resourceCache.get<T>(resourceOrCacheKey);
+  if (isValidResourceKey(resourceOrCacheKey)) {
+    const cachedResource = resourceCache.get<T>(resourceOrCacheKey);
 
-    if (resource == null) {
+    if (cachedResource == null) {
       throw new Error(
         `Cannot find preloaded resource for key "${createResourceCacheHash(
-          cacheKey
+          resourceOrCacheKey
         )}"`
       );
     }
+
+    resource = cachedResource;
   } else {
     resource = resourceOrCacheKey;
   }
@@ -58,7 +54,7 @@ export default function useResource<T = any>(
   useResourceTracking(resource);
 
   // Rerender if resource was invalidated.
-  useResourceInvalidation(cacheKey, forceUpdate);
+  useResourceInvalidation(resource, forceUpdate);
 
   if (error != null || promise != null) {
     throw error ?? promise;
@@ -95,33 +91,30 @@ function useResourceTracking(resource: Resource<any>): void {
 }
 
 function useResourceInvalidation(
-  cacheKey: ResourceCacheKey | undefined,
+  resource: Resource<any>,
   callback: () => void
 ): void {
   const resourceCache = useResourceCache();
   const prevResourceRef = useRef<Resource<any>>();
 
-  if (cacheKey != null && prevResourceRef.current == null) {
-    prevResourceRef.current = resourceCache.get(cacheKey);
+  if (prevResourceRef.current == null) {
+    prevResourceRef.current = resourceCache.get(resource.key);
   }
 
   useEffect(() => {
-    if (cacheKey == null) {
-      return;
-    }
-
     const handleResource = (resource: Resource<any> | undefined): void => {
-      // Only invalidate when current resource has changed or was invalidated (undefined)
+      // Only invalidate when current resource has changed or is undefined
+      // (invalidated)
       if (resource !== prevResourceRef.current) {
         prevResourceRef.current = resource;
         callback();
       }
     };
 
-    resourceCache.subscribe(cacheKey, handleResource);
+    resourceCache.subscribe(resource.key, handleResource);
 
     return () => {
-      resourceCache.unsubscribe(cacheKey, handleResource);
+      resourceCache.unsubscribe(resource.key, handleResource);
     };
-  }, [resourceCache, cacheKey, callback]);
+  }, [resourceCache, resource, callback]);
 }

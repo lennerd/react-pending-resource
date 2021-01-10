@@ -3,7 +3,7 @@ import useResourceTracker from './useResourceTracker';
 
 export default function useIsPending(): boolean {
   const resourceTracker = useResourceTracker();
-  const [isPending, setIsPending] = useState(resourceTracker.isPending());
+  const [isPending, setIsPending] = useState(() => resourceTracker.isPending());
 
   useEffect(() => {
     const handleChange = (): void => {
