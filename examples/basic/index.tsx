@@ -2,8 +2,14 @@ import { usePromise } from "react-pending-resource";
 import ReactDOM from "react-dom";
 import React from "react";
 
+interface User {
+  name: string;
+  age: number;
+  country: string;
+}
+
 // Some function to more some async fetch API call …
-function fetchUser() {
+function fetchUser(): Promise<User> {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({ name: "Pattern Person", age: 22, country: "Germany" });
@@ -39,7 +45,7 @@ function App() {
     <React.Suspense fallback="Loading …">
       <Basic />
       <button type="button" onClick={toggleMore}>
-        Show more
+        Show {showMore ? "less" : "more"}
       </button>
       {showMore && <More />}
     </React.Suspense>
