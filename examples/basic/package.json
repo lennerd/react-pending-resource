@@ -1,5 +1,5 @@
 {
-  "name": "react-pending-resource-preloading",
+  "name": "react-pending-resource-basic",
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
