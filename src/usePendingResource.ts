@@ -12,8 +12,8 @@ export interface UsePendingResourceOptions<T> extends ResourceConfig {
 
 export default function usePendingResource<T = any>(
   resourceOrKey: Resource<T> | ResourceKey,
-  options?: ({ initialRender: false } | { initialData: T }) &
-    UsePendingResourceOptions<T>
+  options: UsePendingResourceOptions<T> &
+    ({ initialRender: false } | { initialData: T })
 ): [T, boolean];
 
 export default function usePendingResource<T = any>(

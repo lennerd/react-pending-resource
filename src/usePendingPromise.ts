@@ -12,10 +12,8 @@ export interface UsePendingPromiseOptions<T>
 export default function usePendingPromise<T>(
   cacheKey: ResourceKey,
   callback: () => T | Promise<T>,
-  depsOrOptions?:
-    | any[]
-    | (({ initialRender: false } | { initialData: T }) &
-        UsePendingPromiseOptions<T>)
+  depsOrOptions: ({ initialRender: false } | { initialData: T }) &
+    UsePendingPromiseOptions<T>
 ): [T, boolean];
 
 export default function usePendingPromise<T>(
