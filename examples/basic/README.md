@@ -1,4 +1,4 @@
-# React Resource Hooks
+# React Pending Resource
 
 Basic example for using promises and reusing resolved values between components.
 
