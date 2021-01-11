@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import isPromise from './utils/isPromise';
 import Resource, { ResourceKey } from './Resource';
 import useResource from './useResource';
 import useResourceConfig, { ResourceConfig } from './useResourceConfig';
+import useForceUpdate from './utils/useForceUpdate';
 
 const NO_DATA = Symbol('NO_DATA');
 
@@ -29,9 +30,10 @@ export default function usePendingResource<T = any>(
     ...useResourceConfig(),
     ...options,
   };
-  const [prevData, setPrevData] = useState(initialData);
+  const forceUpdate = useForceUpdate();
+  const prevData = useRef(initialData);
   const [timedOut, setTimedOut] = useState(false);
-  let data: T | undefined;
+  let data: T | typeof NO_DATA = NO_DATA;
   let promise: Promise<any> | undefined;
   let error: any;
   let isPending = false;
@@ -41,20 +43,19 @@ export default function usePendingResource<T = any>(
     // This try-catch block is necessary to make sure other hooks are always
     // called and to be able to defer promise suspension.
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    data = useResource(resourceOrKey);
+    data = prevData.current = useResource(resourceOrKey);
   } catch (errorOrPromise) {
     if (isPromise(errorOrPromise)) {
       promise = errorOrPromise;
-      data = prevData !== NO_DATA ? prevData : undefined;
+      data = prevData.current;
       isPending = true;
     } else {
       error = errorOrPromise;
     }
   }
 
-  // Set new data when promise was resolved. Also triggers rerendering and rereading the resource (if data is new).
-  // The data is stored as previous data in case a new resource is created and pending again.
-  usePromise(promise, setPrevData);
+  // Force rerendering and rereading the resource when promise was resolved.
+  usePromise(promise, forceUpdate);
 
   // If a valid timeout was set, wait for given seconds to rerender component and let react suspense handle the promise.
   useTimeout(promise && timeout, setTimedOut);
@@ -62,12 +63,13 @@ export default function usePendingResource<T = any>(
   // Throw error or promise, if timed out or no initial data was provided and initial render is disabled
   if (
     error != null ||
-    (promise != null && (timedOut || (prevData === NO_DATA && !initialRender)))
+    (promise != null &&
+      (timedOut || (prevData.current === NO_DATA && !initialRender)))
   ) {
     throw error ?? promise;
   }
 
-  return [data, isPending];
+  return [data !== NO_DATA ? data : undefined, isPending];
 }
 
 function usePromise<T>(

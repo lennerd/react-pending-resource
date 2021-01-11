@@ -7,7 +7,7 @@ import { ResourceCacheProvider } from '../src/useResourceCache';
 import { ResourceConfigProvider } from '../src/useResourceConfig';
 
 describe('usePendingResource', () => {
-  it('waites for promise', async () => {
+  it('waits for promise', async () => {
     expect.assertions(2);
 
     jest.useFakeTimers();
@@ -53,6 +53,7 @@ describe('usePendingResource', () => {
       'some resource',
       new Promise<string>(resolve => setTimeout(() => resolve(value), 1000))
     );
+
     const { result, waitForNextUpdate } = renderHook(() =>
       usePendingResource(resource, { initialRender: false })
     );

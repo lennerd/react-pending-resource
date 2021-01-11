@@ -186,4 +186,37 @@ describe('usePendingPromise', () => {
 
     expect(result.current).toEqual([value, false]);
   });
+
+  it('only suspense on initial render if set to false', async () => {
+    expect.assertions(3);
+
+    const { result, rerender, waitForNextUpdate } = renderHook(
+      ({ resourceKey, value }) =>
+        usePendingPromise(resourceKey, () => Promise.resolve(value), {
+          initialRender: false,
+        }),
+      {
+        initialProps: { resourceKey: 'key A', value: 'value A' },
+        wrapper({ children }) {
+          return (
+            <ResourceCacheProvider cache={resourceCache}>
+              {children}
+            </ResourceCacheProvider>
+          );
+        },
+      }
+    );
+
+    await waitForNextUpdate();
+
+    expect(result.current).toEqual(['value A', false]);
+
+    rerender({ resourceKey: 'key B', value: 'value B' });
+
+    expect(result.current).toEqual(['value A', true]);
+
+    await waitForNextUpdate();
+
+    expect(result.current).toEqual(['value B', false]);
+  });
 });
