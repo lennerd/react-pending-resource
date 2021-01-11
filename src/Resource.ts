@@ -10,10 +10,11 @@ enum ResourceSuspensionStatus {
   REJECTED = 'rejected',
 }
 
-export type ResourceKey = string | number | ResourceKey[];
+export type ResourceKey = string | number | null | undefined | ResourceKey[];
 
 export function isValidResourceKey(value: any): value is ResourceKey {
   return (
+    value == null ||
     typeof value === 'string' ||
     typeof value === 'number' ||
     (Array.isArray(value) && value.every(isValidResourceKey))

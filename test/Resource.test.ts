@@ -61,9 +61,13 @@ describe('isValidResourceKey', () => {
   it('validates resource key', () => {
     expect(isValidResourceKey('string key')).toBe(true);
     expect(isValidResourceKey(2)).toBe(true);
+    expect(isValidResourceKey(null)).toBe(true);
+    expect(isValidResourceKey(undefined)).toBe(true);
     expect(isValidResourceKey(['first', 'second'])).toBe(true);
     expect(isValidResourceKey([1, 'second'])).toBe(true);
-    expect(isValidResourceKey(['first', 2])).toBe(true);
+    expect(isValidResourceKey(['user', null])).toBe(true);
+    expect(isValidResourceKey(['user', 2])).toBe(true);
+    expect(isValidResourceKey(['user', 3, undefined])).toBe(true);
     expect(isValidResourceKey([1, 2])).toBe(true);
     expect(isValidResourceKey([1, 2, ['third', 4, 'fifth']])).toBe(true);
   });
