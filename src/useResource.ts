@@ -7,7 +7,7 @@ import useResourceCache from './useResourceCache';
 import useResourceTracker from './useResourceTracker';
 
 export default function useResource<T = any>(
-  resourceOrCacheKey: Resource<T> | ResourceKey
+  resourceOrKey: Resource<T> | ResourceKey
 ): T {
   const forceUpdate = useForceUpdate();
   const resourceCache = useResourceCache();
@@ -17,20 +17,20 @@ export default function useResource<T = any>(
   let promise: Promise<any> | undefined;
   let error: any;
 
-  if (isValidResourceKey(resourceOrCacheKey)) {
-    const cachedResource = resourceCache.get<T>(resourceOrCacheKey);
+  if (isValidResourceKey(resourceOrKey)) {
+    const cachedResource = resourceCache.get<T>(resourceOrKey);
 
     if (cachedResource == null) {
       throw new Error(
         `Cannot find preloaded resource for key "${createResourceCacheHash(
-          resourceOrCacheKey
+          resourceOrKey
         )}"`
       );
     }
 
     resource = cachedResource;
   } else {
-    resource = resourceOrCacheKey;
+    resource = resourceOrKey;
   }
 
   try {

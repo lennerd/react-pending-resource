@@ -31,9 +31,8 @@ export default function usePendingResource<T = any>(
     ...options,
   };
   const forceUpdate = useForceUpdate();
-  const prevData = useRef(initialData);
+  const dataRef = useRef(initialData);
   const [timedOut, setTimedOut] = useState(false);
-  let data: T | typeof NO_DATA = NO_DATA;
   let promise: Promise<any> | undefined;
   let error: any;
   let isPending = false;
@@ -43,11 +42,10 @@ export default function usePendingResource<T = any>(
     // This try-catch block is necessary to make sure other hooks are always
     // called and to be able to defer promise suspension.
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    data = prevData.current = useResource(resourceOrKey);
+    dataRef.current = useResource(resourceOrKey);
   } catch (errorOrPromise) {
     if (isPromise(errorOrPromise)) {
       promise = errorOrPromise;
-      data = prevData.current;
       isPending = true;
     } else {
       error = errorOrPromise;
@@ -64,12 +62,12 @@ export default function usePendingResource<T = any>(
   if (
     error != null ||
     (promise != null &&
-      (timedOut || (prevData.current === NO_DATA && !initialRender)))
+      (timedOut || (dataRef.current === NO_DATA && !initialRender)))
   ) {
     throw error ?? promise;
   }
 
-  return [data !== NO_DATA ? data : undefined, isPending];
+  return [dataRef.current !== NO_DATA ? dataRef.current : undefined, isPending];
 }
 
 function usePromise<T>(

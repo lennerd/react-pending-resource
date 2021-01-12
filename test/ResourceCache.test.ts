@@ -1,7 +1,7 @@
 import ResourceCache from '../src/ResourceCache';
 
 describe('ResourceCache', () => {
-  it('preloads new resource for same cache key', () => {
+  it('preloads new resource for same key', () => {
     const resourceCache = new ResourceCache();
     const resourceA = resourceCache.preload('key', () => Promise.resolve());
     const resourceB = resourceCache.preload('key', () => Promise.resolve());
@@ -9,7 +9,7 @@ describe('ResourceCache', () => {
     expect(resourceA).not.toBe(resourceB);
   });
 
-  it('preloads new resources for different cache key', () => {
+  it('preloads new resources for different key', () => {
     const resourceCache = new ResourceCache();
     const resourceA = resourceCache.preload('keyA', () => Promise.resolve());
     const resourceB = resourceCache.preload('keyB', () => Promise.resolve());
@@ -17,7 +17,7 @@ describe('ResourceCache', () => {
     expect(resourceA).not.toBe(resourceB);
   });
 
-  it('preloads same resource for same cache key and promise', () => {
+  it('preloads same resource for same key and promise', () => {
     const resourceCache = new ResourceCache();
     const promise = Promise.resolve();
     const resourceA = resourceCache.preload('key', promise);
@@ -26,7 +26,7 @@ describe('ResourceCache', () => {
     expect(resourceA).toBe(resourceB);
   });
 
-  it('preloads same resource for same cache key and promise, but with different call signatures (promise, callback)', () => {
+  it('preloads same resource for same key and promise, but with different call signatures (promise, callback)', () => {
     const resourceCache = new ResourceCache();
     const promise = Promise.resolve();
     const resourceA = resourceCache.preload('key', promise);
@@ -35,7 +35,7 @@ describe('ResourceCache', () => {
     expect(resourceA).toBe(resourceB);
   });
 
-  it('preloads different resources for same cache key and promise, but with different call signatures (callback, promise)', () => {
+  it('preloads different resources for same key and promise, but with different call signatures (callback, promise)', () => {
     const resourceCache = new ResourceCache();
     const resourceA = resourceCache.preload('key', () => Promise.resolve());
     const resourceB = resourceCache.preload('key', Promise.resolve());
@@ -43,7 +43,7 @@ describe('ResourceCache', () => {
     expect(resourceA).not.toBe(resourceB);
   });
 
-  it('preloads same resource for same cache key and promise, but with different call signatures (callback, promise)', () => {
+  it('preloads same resource for same key and promise, but with different call signatures (callback, promise)', () => {
     const resourceCache = new ResourceCache();
     const promise = Promise.resolve();
     const resourceA = resourceCache.preload('key', () => promise);

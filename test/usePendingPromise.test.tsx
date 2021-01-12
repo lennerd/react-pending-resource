@@ -11,17 +11,17 @@ describe('usePendingPromise', () => {
     resourceCache = new ResourceCache();
   });
 
-  it('resolves and reloads with new cache key', async () => {
+  it('resolves and reloads with new key', async () => {
     expect.assertions(4);
 
-    let cacheKey = 'cacheKeyA';
+    let key = 'keyA';
 
     const valueA = 'valueA';
     const valueB = 'valueB';
     let value = valueA;
 
     const { result, waitForNextUpdate, rerender } = renderHook(
-      () => usePendingPromise(cacheKey, () => Promise.resolve(value)),
+      () => usePendingPromise(key, () => Promise.resolve(value)),
       {
         wrapper({ children }) {
           return (
@@ -39,7 +39,7 @@ describe('usePendingPromise', () => {
 
     expect(result.current).toEqual([valueA, false]);
 
-    cacheKey = 'cacheKeyB';
+    key = 'keyB';
     value = valueB;
 
     rerender();
@@ -55,7 +55,7 @@ describe('usePendingPromise', () => {
     expect.assertions(2);
 
     const { result, waitForNextUpdate } = renderHook(
-      () => usePendingPromise('cacheKey', () => Promise.reject(new Error())),
+      () => usePendingPromise('key', () => Promise.reject(new Error())),
       {
         wrapper({ children }) {
           return (
@@ -86,7 +86,7 @@ describe('usePendingPromise', () => {
     let dependency = 'a';
 
     const { result, waitForNextUpdate, rerender } = renderHook(
-      () => usePendingPromise('cacheKey', callback, [dependency]),
+      () => usePendingPromise('key', callback, [dependency]),
       {
         wrapper({ children }) {
           return (
@@ -126,7 +126,7 @@ describe('usePendingPromise', () => {
     let dependency = 'a';
 
     const { result, waitForNextUpdate, rerender } = renderHook(
-      () => usePendingPromise('cacheKey', callback, { deps: [dependency] }),
+      () => usePendingPromise('key', callback, { deps: [dependency] }),
       {
         wrapper({ children }) {
           return (
@@ -157,7 +157,7 @@ describe('usePendingPromise', () => {
   it('uses preloaded resources', async () => {
     expect.assertions(2);
 
-    const cacheKey = 'cacheKey';
+    const key = 'key';
     const value = 'value';
     const dependency = 'a';
     const callback = jest
@@ -165,10 +165,10 @@ describe('usePendingPromise', () => {
       .mockImplementationOnce(() => Promise.resolve(value))
       .mockImplementationOnce(() => Promise.resolve('never'));
 
-    resourceCache.preload(cacheKey, callback);
+    resourceCache.preload(key, callback);
 
     const { result, waitForNextUpdate } = renderHook(
-      () => usePendingPromise(cacheKey, callback, [dependency]),
+      () => usePendingPromise(key, callback, [dependency]),
       {
         wrapper({ children }) {
           return (

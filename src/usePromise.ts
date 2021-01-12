@@ -3,11 +3,11 @@ import useResource from './useResource';
 import useResourcePreloading from './useResourcePreloading';
 
 export default function usePromise<T>(
-  cacheKey: ResourceKey,
+  key: ResourceKey,
   callback: () => Promise<T> | T,
   deps?: any[]
 ): T {
-  const resource = useResourcePreloading(cacheKey, callback, deps);
+  const resource = useResourcePreloading(key, callback, deps);
 
   return useResource(resource);
 }

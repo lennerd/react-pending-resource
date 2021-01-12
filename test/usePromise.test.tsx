@@ -16,11 +16,11 @@ describe('usePromise', () => {
       .mockReturnValueOnce(Promise.resolve('third'))
       .mockReturnValueOnce(Promise.resolve('fourth'));
 
-    let cacheKey = 'cacheKeyA';
+    let key = 'keyA';
     let dependency = 'a';
 
     const { result, waitForNextUpdate, rerender } = renderHook(
-      () => usePromise(cacheKey, callback, [dependency]),
+      () => usePromise(key, callback, [dependency]),
       {
         wrapper({ children }) {
           return (
@@ -44,12 +44,12 @@ describe('usePromise', () => {
     expect(result.current).toBe('second');
 
     act(() => {
-      resourceCache.invalidate(cacheKey);
+      resourceCache.invalidate(key);
     });
     await waitForNextUpdate();
     expect(result.current).toBe('third');
 
-    cacheKey = 'cacheKeyB';
+    key = 'keyB';
     rerender();
     await waitForNextUpdate();
     expect(result.current).toBe('fourth');

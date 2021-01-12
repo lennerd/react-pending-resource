@@ -4,16 +4,16 @@ import useResourceCache from './useResourceCache';
 import shallowEqual from './utils/shallowEqual';
 
 export default function useResourcePreloading<T>(
-  cacheKey: ResourceKey,
+  key: ResourceKey,
   callback: () => Promise<T> | T,
   deps?: any[]
 ): Resource<T> {
   const depsRef = useRef(deps);
   const resourceCache = useResourceCache();
-  let resource = resourceCache.get(cacheKey);
+  let resource = resourceCache.get(key);
 
   if (resource == null || !shallowEqual(depsRef.current, deps)) {
-    resource = resourceCache.preload(cacheKey, callback);
+    resource = resourceCache.preload(key, callback);
     depsRef.current = deps;
   }
 

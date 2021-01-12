@@ -8,8 +8,8 @@ A dedicated page with more information, examples and documentation coming soon.
 
 ## Why another async hook library for React?
 
-* Powerful caching by using serializable cache keys
-* Easy refetching of resources by using cache keys and more complex dependencies if needed
+* Powerful caching by using serializable resource keys
+* Easy refetching of resources by using resource keys and more complex dependencies if needed
 * Easy preloading of resources for better performance
 * Built around stable Suspense features (without using experimental APIs)
 * Easy deferring of rendering suspense fallbacks like loading spinners

@@ -72,14 +72,14 @@ describe('usePendingResource', () => {
 
     const resourceCache = new ResourceCache();
 
-    const cacheKey = 'cache key';
+    const key = 'key';
     const valueA = 'value A';
     const valueB = 'value B';
 
-    resourceCache.preload(cacheKey, Promise.resolve(valueA));
+    resourceCache.preload(key, Promise.resolve(valueA));
 
     const { result, waitForNextUpdate } = renderHook(
-      () => usePendingResource(cacheKey),
+      () => usePendingResource(key),
       {
         wrapper({ children }) {
           return (
@@ -98,7 +98,7 @@ describe('usePendingResource', () => {
     expect(result.current).toEqual([valueA, false]);
 
     act(() => {
-      resourceCache.preload(cacheKey, Promise.resolve(valueB));
+      resourceCache.preload(key, Promise.resolve(valueB));
     });
 
     await waitForNextUpdate();

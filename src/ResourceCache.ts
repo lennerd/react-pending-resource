@@ -72,10 +72,10 @@ export default class ResourceCache {
   }
 
   public subscribe(
-    cacheKey: ResourceKey,
+    key: ResourceKey,
     callback: ResourceCacheInvalidationCallback
   ): void {
-    const cacheHash = createResourceCacheHash(cacheKey);
+    const cacheHash = createResourceCacheHash(key);
     let subscribers = this.subscribers.get(cacheHash);
 
     if (subscribers == null) {
@@ -86,10 +86,10 @@ export default class ResourceCache {
   }
 
   public unsubscribe(
-    cacheKey: ResourceKey,
+    key: ResourceKey,
     callback: ResourceCacheInvalidationCallback
   ): void {
-    const cacheHash = createResourceCacheHash(cacheKey);
+    const cacheHash = createResourceCacheHash(key);
     const subscribers = this.subscribers.get(cacheHash);
 
     if (subscribers != null) {
@@ -101,8 +101,8 @@ export default class ResourceCache {
     }
   }
 
-  public invalidate(cacheKey: ResourceKey): void {
-    const cacheHash = createResourceCacheHash(cacheKey);
+  public invalidate(key: ResourceKey): void {
+    const cacheHash = createResourceCacheHash(key);
 
     this.garbageCollect();
 
@@ -111,8 +111,8 @@ export default class ResourceCache {
     }
   }
 
-  public get<T = any>(cacheKey: ResourceKey): Resource<T> | undefined {
-    const cacheHash = createResourceCacheHash(cacheKey);
+  public get<T = any>(key: ResourceKey): Resource<T> | undefined {
+    const cacheHash = createResourceCacheHash(key);
 
     this.garbageCollect();
 
