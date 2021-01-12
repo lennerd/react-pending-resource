@@ -48,7 +48,8 @@ console.log(usePendingResource);
 
 function Profile({ userId }: ProfileProps) {
   const [user] = usePendingPromise(["user", userId], () => fetchUser(userId), {
-    initialRender: false
+    initialRender: false,
+    timeout: 400
   });
 
   return <div>{user?.name}</div>;
