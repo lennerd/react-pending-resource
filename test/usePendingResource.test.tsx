@@ -120,7 +120,7 @@ describe('usePendingResource', () => {
     expect(result.error).toBeInstanceOf(Error);
   });
 
-  it('suspends after timeout', async () => {
+  it('suspends after timeToSuspense', async () => {
     expect.assertions(3);
 
     jest.useFakeTimers();
@@ -131,7 +131,7 @@ describe('usePendingResource', () => {
       new Promise(resolve => setTimeout(() => resolve(value), 1000))
     );
     const { result, waitForNextUpdate } = renderHook(() =>
-      usePendingResource(resource, { timeout: 500 })
+      usePendingResource(resource, { timeToSuspense: 500 })
     );
 
     expect(result.current).toEqual([undefined, true]);
@@ -164,7 +164,7 @@ describe('usePendingResource', () => {
       {
         wrapper({ children }) {
           return (
-            <ResourceConfigProvider config={{ timeout: 750 }}>
+            <ResourceConfigProvider config={{ timeToSuspense: 750 }}>
               {children}
             </ResourceConfigProvider>
           );

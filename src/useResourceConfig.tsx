@@ -6,7 +6,7 @@ import React, {
 } from 'react';
 
 export interface ResourceConfig {
-  timeout?: number;
+  timeToSuspense?: number;
   initialRender?: boolean;
 }
 

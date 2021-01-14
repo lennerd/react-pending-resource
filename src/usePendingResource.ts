@@ -26,13 +26,13 @@ export default function usePendingResource<T = any>(
   resourceOrKey: Resource<T> | ResourceKey,
   options: UsePendingResourceOptions<T> = {}
 ): [T | undefined, boolean] {
-  const { timeout, initialRender = true, initialData = NO_DATA } = {
+  const { timeToSuspense, initialRender = true, initialData = NO_DATA } = {
     ...useResourceConfig(),
     ...options,
   };
   const forceUpdate = useForceUpdate();
   const dataRef = useRef(initialData);
-  const [timedOut, setTimedOut] = useState(false);
+  const [shouldSuspense, setSuspense] = useState(false);
   let promise: Promise<any> | undefined;
   let error: any;
   let isPending = false;
@@ -55,14 +55,14 @@ export default function usePendingResource<T = any>(
   // Force rerendering and rereading the resource when promise was resolved.
   usePromise(promise, forceUpdate);
 
-  // If a valid timeout was set, wait for given seconds to rerender component and let react suspense handle the promise.
-  useTimeout(promise && timeout, setTimedOut);
+  // If a valid timeToSuspense was set, wait for given seconds to rerender component and let react suspense handle the promise.
+  useTimeout(promise && timeToSuspense, setSuspense);
 
   // Throw error or promise, if timed out or no initial data was provided and initial render is disabled
   if (
     error != null ||
     (promise != null &&
-      (timedOut || (dataRef.current === NO_DATA && !initialRender)))
+      (shouldSuspense || (dataRef.current === NO_DATA && !initialRender)))
   ) {
     throw error ?? promise;
   }
