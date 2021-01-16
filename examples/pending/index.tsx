@@ -1,6 +1,6 @@
-import { usePendingPromise, usePendingResource } from "react-pending-resource";
-import ReactDOM from "react-dom";
-import React from "react";
+import { usePendingPromise, usePendingResource } from 'react-pending-resource';
+import ReactDOM from 'react-dom';
+import React from 'react';
 
 interface User {
   name: string;
@@ -10,30 +10,30 @@ interface User {
 
 const users: User[] = [
   {
-    name: "User 1",
+    name: 'User 1',
     age: 21,
-    country: "Poland"
+    country: 'Poland',
   },
   {
-    name: "User 2",
+    name: 'User 2',
     age: 42,
-    country: "Sweden"
+    country: 'Sweden',
   },
   {
-    name: "User 3",
+    name: 'User 3',
     age: 24,
-    country: "Spain"
+    country: 'Spain',
   },
   {
-    name: "User 4",
+    name: 'User 4',
     age: 12,
-    country: "Italy"
-  }
+    country: 'Italy',
+  },
 ];
 
 // Some function to more some async fetch API call …
 function fetchUser(id: number): Promise<User> {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     setTimeout(() => {
       resolve(users[id - 1]);
     }, 250 + Math.random() * 1000);
@@ -48,11 +48,10 @@ console.log(usePendingResource);
 
 function Profile({ userId }: ProfileProps) {
   const [user] = usePendingPromise(["user", userId], () => fetchUser(userId), {
-    initialRender: false,
-    timeout: 400
+    initialRender: false
   });
 
-  return <div>{user?.name}</div>;
+  return <div>{user.name}</div>;
 }
 
 function App() {
@@ -74,4 +73,4 @@ function App() {
   );
 }
 
-ReactDOM.render(<App />, document.getElementById("root"));
+ReactDOM.render(<App />, document.getElementById('root'));

@@ -12,15 +12,16 @@ export interface UsePendingPromiseOptions<T>
 export default function usePendingPromise<T>(
   key: ResourceKey,
   callback: () => T | Promise<T>,
-  depsOrOptions: ({ initialRender: false } | { initialData: T }) &
-    UsePendingPromiseOptions<T>
-): [T, boolean];
+  options: Omit<UsePendingPromiseOptions<T>, 'initialData'> & {
+    initialRender: true;
+  }
+): [T | undefined, boolean];
 
 export default function usePendingPromise<T>(
   key: ResourceKey,
   callback: () => T | Promise<T>,
   depsOrOptions?: any[] | UsePendingPromiseOptions<T>
-): [T | undefined, boolean];
+): [T, boolean];
 
 export default function usePendingPromise<T>(
   key: ResourceKey,

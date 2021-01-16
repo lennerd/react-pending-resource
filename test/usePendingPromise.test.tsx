@@ -12,7 +12,7 @@ describe('usePendingPromise', () => {
   });
 
   it('resolves and reloads with new key', async () => {
-    expect.assertions(4);
+    expect.assertions(3);
 
     let key = 'keyA';
 
@@ -33,8 +33,6 @@ describe('usePendingPromise', () => {
       }
     );
 
-    expect(result.current).toEqual([undefined, true]);
-
     await waitForNextUpdate();
 
     expect(result.current).toEqual([valueA, false]);
@@ -52,7 +50,7 @@ describe('usePendingPromise', () => {
   });
 
   it('rejects', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
 
     const { result, waitForNextUpdate } = renderHook(
       () => usePendingPromise('key', () => Promise.reject(new Error())),
@@ -67,15 +65,13 @@ describe('usePendingPromise', () => {
       }
     );
 
-    expect(result.current).toEqual([undefined, true]);
-
     await waitForNextUpdate();
 
     expect(result.error).toBeInstanceOf(Error);
   });
 
   it('reloads with deps as array', async () => {
-    expect.assertions(4);
+    expect.assertions(3);
 
     const valueA = 'valueA';
     const valueB = 'valueB';
@@ -98,8 +94,6 @@ describe('usePendingPromise', () => {
       }
     );
 
-    expect(result.current).toEqual([undefined, true]);
-
     await waitForNextUpdate();
 
     expect(result.current).toEqual([valueA, false]);
@@ -115,7 +109,7 @@ describe('usePendingPromise', () => {
   });
 
   it('reloads with deps as options', async () => {
-    expect.assertions(4);
+    expect.assertions(3);
 
     const valueA = 'valueA';
     const valueB = 'valueB';
@@ -138,8 +132,6 @@ describe('usePendingPromise', () => {
       }
     );
 
-    expect(result.current).toEqual([undefined, true]);
-
     await waitForNextUpdate();
 
     expect(result.current).toEqual([valueA, false]);
@@ -155,7 +147,7 @@ describe('usePendingPromise', () => {
   });
 
   it('uses preloaded resources', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
 
     const key = 'key';
     const value = 'value';
@@ -180,20 +172,18 @@ describe('usePendingPromise', () => {
       }
     );
 
-    expect(result.current).toEqual([undefined, true]);
-
     await waitForNextUpdate();
 
     expect(result.current).toEqual([value, false]);
   });
 
   it('only suspense on initial render if set to false', async () => {
-    expect.assertions(3);
+    expect.assertions(4);
 
     const { result, rerender, waitForNextUpdate } = renderHook(
       ({ resourceKey, value }) =>
         usePendingPromise(resourceKey, () => Promise.resolve(value), {
-          initialRender: false,
+          initialRender: true,
         }),
       {
         initialProps: { resourceKey: 'key A', value: 'value A' },
@@ -206,6 +196,8 @@ describe('usePendingPromise', () => {
         },
       }
     );
+
+    expect(result.current).toEqual([undefined, true]);
 
     await waitForNextUpdate();
 

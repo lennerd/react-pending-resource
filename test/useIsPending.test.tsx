@@ -24,12 +24,15 @@ describe('useIsPending', () => {
 
     expect(result.current).toBe(false);
 
-    const promise = new Promise(resolve => {
-      setTimeout(resolve, 1000);
-    });
+    const resource = createResource(
+      'test',
+      new Promise(resolve => {
+        setTimeout(resolve, 1000);
+      })
+    );
 
     act(() => {
-      resourceTracker.add(createResource('test', promise));
+      resourceTracker.add(resource);
     });
 
     expect(result.current).toBe(true);

@@ -13,20 +13,21 @@ export interface UsePendingResourceOptions<T> extends ResourceConfig {
 
 export default function usePendingResource<T = any>(
   resourceOrKey: Resource<T> | ResourceKey,
-  options: UsePendingResourceOptions<T> &
-    ({ initialRender: false } | { initialData: T })
-): [T, boolean];
+  options: Omit<UsePendingResourceOptions<T>, 'initialData'> & {
+    initialRender: true;
+  }
+): [T | undefined, boolean];
 
 export default function usePendingResource<T = any>(
   resourceOrKey: Resource<T> | ResourceKey,
   options?: UsePendingResourceOptions<T>
-): [T | undefined, boolean];
+): [T, boolean];
 
 export default function usePendingResource<T = any>(
   resourceOrKey: Resource<T> | ResourceKey,
   options: UsePendingResourceOptions<T> = {}
 ): [T | undefined, boolean] {
-  const { timeToSuspense, initialRender = true, initialData = NO_DATA } = {
+  const { timeToSuspense, initialRender, initialData = NO_DATA } = {
     ...useResourceConfig(),
     ...options,
   };

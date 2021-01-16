@@ -6,24 +6,44 @@ import usePendingResource from '../src/usePendingResource';
 import { ResourceCacheProvider } from '../src/useResourceCache';
 import { ResourceConfigProvider } from '../src/useResourceConfig';
 
-describe('usePendingResource', () => {
-  it('waits for promise', async () => {
-    expect.assertions(2);
+function resolveAfter<T>(value: T, delay: number) {
+  return new Promise<T>(resolve => setTimeout(() => resolve(value), delay));
+}
 
-    jest.useFakeTimers();
+function rejectAfter(error: any, delay: number) {
+  return new Promise<never>((_, reject) =>
+    setTimeout(() => reject(error), delay)
+  );
+}
+
+describe('usePendingResource', () => {
+  let resourceCache: ResourceCache;
+
+  const TestWrapper = ({ children }: { children: React.ReactNode }) => {
+    return (
+      <ResourceCacheProvider cache={resourceCache}>
+        {children}
+      </ResourceCacheProvider>
+    );
+  };
+
+  beforeEach(() => {
+    resourceCache = new ResourceCache();
+  });
+
+  it('waits for promise', async () => {
+    expect.assertions(1);
 
     const value = 'test data';
-    const resource = createResource(
-      'test resource',
-      new Promise<string>(resolve => setTimeout(() => resolve(value), 1000))
+    const resource = createResource('test resource', Promise.resolve(value));
+    const { result, waitForNextUpdate } = renderHook(
+      () => usePendingResource(resource),
+      {
+        wrapper: TestWrapper,
+      }
     );
-    const { result } = renderHook(() => usePendingResource(resource));
 
-    expect(result.current).toEqual([undefined, true]);
-
-    await act(async () => {
-      jest.runAllTimers();
-    });
+    await waitForNextUpdate();
 
     expect(result.current).toEqual([value, false]);
   });
@@ -34,28 +54,58 @@ describe('usePendingResource', () => {
     const initialData = 'initial data';
     const resource = createResource(
       'test resource',
-      new Promise<string>(resolve => setTimeout(() => resolve('value'), 1000))
+      resolveAfter('value', 1000)
     );
-    const { result } = renderHook(() =>
-      usePendingResource(resource, { initialData })
+    const { result } = renderHook(
+      () => usePendingResource(resource, { initialData }),
+      {
+        wrapper: TestWrapper,
+      }
     );
 
     expect(result.current).toEqual([initialData, true]);
   });
 
-  it('suspends if initial render is disabled', async () => {
-    expect.assertions(1);
+  it('suspends if initial render is enabled', async () => {
+    expect.assertions(2);
 
     jest.useFakeTimers();
 
     const value = 'some data';
-    const resource = createResource(
-      'some resource',
-      new Promise<string>(resolve => setTimeout(() => resolve(value), 1000))
+    const resource = createResource('some resource', resolveAfter(value, 1000));
+
+    const { result } = renderHook(
+      () => usePendingResource(resource, { initialRender: true }),
+      {
+        wrapper: TestWrapper,
+      }
     );
 
-    const { result, waitForNextUpdate } = renderHook(() =>
-      usePendingResource(resource, { initialRender: false })
+    expect(result.current).toEqual([undefined, true]);
+
+    await act(async () => {
+      jest.runAllTimers();
+    });
+
+    expect(result.current).toEqual([value, false]);
+  });
+
+  it('rerender if resource was preloaded again', async () => {
+    expect.assertions(2);
+
+    jest.useFakeTimers();
+
+    const key = 'key';
+    const valueA = 'value A';
+    const valueB = 'value B';
+
+    resourceCache.preload(key, resolveAfter(valueA, 1000));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => usePendingResource(key),
+      {
+        wrapper: TestWrapper,
+      }
     );
 
     await act(async () => {
@@ -64,60 +114,42 @@ describe('usePendingResource', () => {
 
     await waitForNextUpdate();
 
-    expect(result.current).toEqual([value, false]);
-  });
-
-  it('rerender if resource was preloaded again', async () => {
-    expect.assertions(3);
-
-    const resourceCache = new ResourceCache();
-
-    const key = 'key';
-    const valueA = 'value A';
-    const valueB = 'value B';
-
-    resourceCache.preload(key, Promise.resolve(valueA));
-
-    const { result, waitForNextUpdate } = renderHook(
-      () => usePendingResource(key),
-      {
-        wrapper({ children }) {
-          return (
-            <ResourceCacheProvider cache={resourceCache}>
-              {children}
-            </ResourceCacheProvider>
-          );
-        },
-      }
-    );
-
-    expect(result.current).toEqual([undefined, true]);
-
-    await waitForNextUpdate();
-
     expect(result.current).toEqual([valueA, false]);
 
     act(() => {
-      resourceCache.preload(key, Promise.resolve(valueB));
+      resourceCache.preload(key, resolveAfter(valueB, 1000));
     });
 
-    await waitForNextUpdate();
+    await act(async () => {
+      jest.runAllTimers();
+    });
 
     expect(result.current).toEqual([valueB, false]);
   });
 
   it('throws error', async () => {
+    jest.useFakeTimers();
+
     const resource = createResource(
       'rejected resource',
-      Promise.reject(new Error())
+      rejectAfter(new Error('promise was rejected'), 1000)
     );
-    const { result, waitForNextUpdate } = renderHook(() =>
-      usePendingResource(resource)
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => usePendingResource(resource),
+      {
+        wrapper: TestWrapper,
+      }
     );
+
+    await act(async () => {
+      jest.runAllTimers();
+    });
 
     await waitForNextUpdate();
 
     expect(result.error).toBeInstanceOf(Error);
+    expect(result.error!.message).toBe('promise was rejected');
   });
 
   it('suspends after timeToSuspense', async () => {
@@ -126,12 +158,16 @@ describe('usePendingResource', () => {
     jest.useFakeTimers();
 
     const value = 'test value';
-    const resource = createResource(
-      'test resource',
-      new Promise(resolve => setTimeout(() => resolve(value), 1000))
-    );
-    const { result, waitForNextUpdate } = renderHook(() =>
-      usePendingResource(resource, { timeToSuspense: 500 })
+    const resource = createResource('test resource', resolveAfter(value, 1000));
+    const { result, waitForNextUpdate } = renderHook(
+      () =>
+        usePendingResource(resource, {
+          initialRender: true,
+          timeToSuspense: 500,
+        }),
+      {
+        wrapper: TestWrapper,
+      }
     );
 
     expect(result.current).toEqual([undefined, true]);
@@ -155,17 +191,14 @@ describe('usePendingResource', () => {
 
     const value = 'test value';
 
-    const resource = createResource(
-      'test resource',
-      new Promise(resolve => setTimeout(() => resolve(value), 1000))
-    );
+    const resource = createResource('test resource', resolveAfter(value, 1000));
     const { result, waitForNextUpdate } = renderHook(
-      () => usePendingResource(resource),
+      () => usePendingResource(resource, { initialRender: true }),
       {
         wrapper({ children }) {
           return (
             <ResourceConfigProvider config={{ timeToSuspense: 750 }}>
-              {children}
+              <TestWrapper>{children}</TestWrapper>
             </ResourceConfigProvider>
           );
         },
