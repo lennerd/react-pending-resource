@@ -1,83 +1,82 @@
-import { act, renderHook } from '@testing-library/react-hooks';
-import * as React from 'react';
-import { createResource, ResourceAllocation } from '../src/Resource';
-import ResourceCache from '../src/ResourceCache';
-import useResource from '../src/useResource';
-import { ResourceCacheProvider } from '../src/useResourceCache';
+import { act } from '@testing-library/react-hooks';
+import { createResource, ResourceAllocation } from '../Resource';
+import ResourceCache from '../ResourceCache';
+import useResource from '../useResource';
+import { renderResourceHook } from './utils';
 
 describe('useResource', () => {
-  let resourceCache: ResourceCache;
-
-  beforeEach(() => {
-    resourceCache = new ResourceCache();
-  });
-
   it('reads from resolved promise by resource', async () => {
-    expect.assertions(1);
+    expect.assertions(2);
 
     const value = 'resolved data';
     const promise = Promise.resolve(value);
     const resource = createResource('resolved resource', promise);
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result, waitForNextUpdate } = renderResourceHook(() =>
       useResource(resource)
     );
 
     await waitForNextUpdate();
+    expect(result.all).toHaveLength(1);
     expect(result.current).toBe(value);
   });
 
   it('reads from resolved promise by key', async () => {
-    expect.assertions(1);
+    expect.assertions(2);
 
     const value = 'resolved data';
     const key = 'key';
     const promise = Promise.resolve(value);
 
-    resourceCache.preload(key, promise);
+    const cache = new ResourceCache();
 
-    const { result, waitForNextUpdate } = renderHook(() => useResource(key), {
-      wrapper({ children }) {
-        return (
-          <ResourceCacheProvider cache={resourceCache}>
-            {children}
-          </ResourceCacheProvider>
-        );
-      },
-    });
+    cache.preload(key, promise);
+
+    const { result, waitForNextUpdate } = renderResourceHook(
+      () => useResource(key),
+      {
+        cache,
+      }
+    );
 
     await waitForNextUpdate();
+    expect(result.all).toHaveLength(1);
     expect(result.current).toBe(value);
   });
 
   it('throws when using unknown key', () => {
-    const { result } = renderHook(() => useResource('unknownKey'));
+    const { result } = renderResourceHook(() => useResource('unknownKey'));
 
     expect(result.error).toBeInstanceOf(Error);
+    expect(result.error?.message).toBe(
+      'Cannot find preloaded resource for key "unknownKey".'
+    );
   });
 
   it('throws when promise got rejected', async () => {
-    expect.assertions(2);
+    expect.assertions(4);
 
     const value = 'value';
     let resource = createResource('resolved value', Promise.resolve(value));
 
-    const { result, waitForNextUpdate, rerender } = renderHook(() =>
+    const { result, waitForNextUpdate, rerender } = renderResourceHook(() =>
       useResource(resource)
     );
 
     await waitForNextUpdate();
+    expect(result.all).toHaveLength(1);
     expect(result.current).toBe(value);
 
     resource = createResource('rejected value', Promise.reject(new Error()));
     rerender();
 
     await waitForNextUpdate();
+    expect(result.all).toHaveLength(2);
     expect(result.error).toBeInstanceOf(Error);
   });
 
   it('gets notified when resource gets preloaded', async () => {
-    expect.assertions(2);
+    expect.assertions(4);
 
     const key = 'key';
     const valueA = 'value A';
@@ -85,26 +84,26 @@ describe('useResource', () => {
     const promiseA = Promise.resolve(valueA);
     const promiseB = Promise.resolve(valueB);
 
-    resourceCache.preload(key, promiseA);
+    const cache = new ResourceCache();
 
-    const { result, waitForNextUpdate } = renderHook(() => useResource(key), {
-      wrapper({ children }) {
-        return (
-          <ResourceCacheProvider cache={resourceCache}>
-            {children}
-          </ResourceCacheProvider>
-        );
-      },
-    });
+    cache.preload(key, promiseA);
+
+    const { result, waitForNextUpdate } = renderResourceHook(
+      () => useResource(key),
+      {
+        cache,
+      }
+    );
 
     await waitForNextUpdate();
+    expect(result.all).toHaveLength(1);
     expect(result.current).toBe(valueA);
 
-    act(() => {
-      resourceCache.preload(key, promiseB);
+    await act(async () => {
+      cache.preload(key, promiseB);
     });
 
-    await waitForNextUpdate();
+    expect(result.all).toHaveLength(2);
     expect(result.current).toBe(valueB);
   });
 
@@ -114,7 +113,7 @@ describe('useResource', () => {
     const promise = Promise.resolve();
     const resource = createResource('attach detach', promise);
 
-    const { waitForNextUpdate, unmount } = renderHook(() =>
+    const { waitForNextUpdate, unmount } = renderResourceHook(() =>
       useResource(resource)
     );
 

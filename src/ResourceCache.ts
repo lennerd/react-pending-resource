@@ -41,8 +41,6 @@ export default class ResourceCache {
   ): Resource<T> {
     const cacheHash = createResourceCacheHash(key);
 
-    this.garbageCollect();
-
     let entry = this.cache.get(cacheHash) as ResourceCacheEntry<T>;
 
     if (entry == null) {
@@ -66,7 +64,8 @@ export default class ResourceCache {
     entry.resource = createResource(key, promise);
     entry.promiseOrValue = promise;
 
-    this.notifySubscribers(cacheHash);
+    this.scheduleNotification(cacheHash);
+    this.scheduleGarbageCollection();
 
     return entry.resource;
   }
@@ -104,31 +103,31 @@ export default class ResourceCache {
   public invalidate(key: ResourceKey): void {
     const cacheHash = createResourceCacheHash(key);
 
-    this.garbageCollect();
+    this.scheduleGarbageCollection();
 
     if (this.cache.delete(cacheHash)) {
-      this.notifySubscribers(cacheHash);
+      this.scheduleNotification(cacheHash);
     }
   }
 
   public get<T = any>(key: ResourceKey): Resource<T> | undefined {
     const cacheHash = createResourceCacheHash(key);
 
-    this.garbageCollect();
+    this.scheduleGarbageCollection();
 
     return this.cache.get(cacheHash)?.resource;
   }
 
-  private notifySubscribers(cacheHash: string): void {
-    const subscribers = this.subscribers.get(cacheHash);
+  private scheduleNotification(cacheHash: string): void {
     const resource = this.cache.get(cacheHash)?.resource;
+    const subscribers = this.subscribers.get(cacheHash);
 
     subscribers?.forEach(callback => {
       callback(resource);
     });
   }
 
-  private garbageCollect = batch((): void => {
+  private scheduleGarbageCollection = batch((): void => {
     this.cache.forEach((entry, key) => {
       if (entry.resource?.getAllocation() === ResourceAllocation.FREED) {
         this.cache.delete(key);

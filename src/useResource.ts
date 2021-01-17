@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import isPromise from './utils/isPromise';
 import useForceUpdate from './utils/useForceUpdate';
 import Resource, { isValidResourceKey, ResourceKey } from './Resource';
@@ -22,9 +22,9 @@ export default function useResource<T = any>(
 
     if (cachedResource == null) {
       throw new Error(
-        `Cannot find preloaded resource for key "${createResourceCacheHash(
+        `Cannot find preloaded resource for key ${createResourceCacheHash(
           resourceOrKey
-        )}"`
+        )}.`
       );
     }
 
@@ -95,26 +95,17 @@ function useResourceInvalidation(
   callback: () => void
 ): void {
   const resourceCache = useResourceCache();
-  const prevResourceRef = useRef<Resource<any>>();
-
-  if (prevResourceRef.current == null) {
-    prevResourceRef.current = resourceCache.get(resource.key);
-  }
+  const { key: resourceKey } = resource;
 
   useEffect(() => {
-    const handleResource = (resource: Resource<any> | undefined): void => {
-      // Only invalidate when current resource has changed or is undefined
-      // (invalidated)
-      if (resource !== prevResourceRef.current) {
-        prevResourceRef.current = resource;
-        callback();
-      }
-    };
+    if (resourceKey == null) {
+      return;
+    }
 
-    resourceCache.subscribe(resource.key, handleResource);
+    resourceCache.subscribe(resourceKey, callback);
 
     return () => {
-      resourceCache.unsubscribe(resource.key, handleResource);
+      resourceCache.unsubscribe(resourceKey, callback);
     };
-  }, [resourceCache, resource, callback]);
+  }, [resourceCache, resourceKey, callback]);
 }

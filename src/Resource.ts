@@ -23,11 +23,14 @@ export function isValidResourceKey(value: any): value is ResourceKey {
 
 export default interface Resource<T> {
   readonly key: ResourceKey;
+  $id: number;
   getAllocation(): ResourceAllocation;
   allocate(): void;
   free(): void;
   read(): T;
 }
+
+let lastResourceId = 0;
 
 export function createResource<T>(
   key: ResourceKey,
@@ -54,6 +57,7 @@ export function createResource<T>(
 
   return {
     key,
+    $id: ++lastResourceId,
 
     read(): T {
       if (status === ResourceSuspensionStatus.PENDING) {

@@ -1,4 +1,4 @@
-import ResourceCache from '../src/ResourceCache';
+import ResourceCache from '../ResourceCache';
 
 describe('ResourceCache', () => {
   it('preloads new resource for same key', () => {

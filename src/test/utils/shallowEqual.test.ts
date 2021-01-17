@@ -1,4 +1,4 @@
-import shallowEqual from '../../src/utils/shallowEqual';
+import shallowEqual from '../../utils/shallowEqual';
 
 describe('shallowEqual', () => {
   it('checks for equality of arrays', () => {

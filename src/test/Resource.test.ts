@@ -2,7 +2,7 @@ import {
   createResource,
   isValidResourceKey,
   ResourceAllocation,
-} from '../src/Resource';
+} from '../Resource';
 
 describe('Resource', () => {
   it('has a key', () => {

@@ -1,5 +1,6 @@
-import { createResource } from '../src/Resource';
-import ResourceTracker from '../src/ResourceTracker';
+import { createResource } from '../Resource';
+import ResourceTracker from '../ResourceTracker';
+import { resolveAfter } from './utils';
 
 describe('ResourceTracker', () => {
   let resourceTracker: ResourceTracker;
@@ -13,24 +14,9 @@ describe('ResourceTracker', () => {
 
     jest.useFakeTimers();
 
-    const resourceA = createResource(
-      'test A',
-      new Promise(resolve => {
-        setTimeout(resolve, 500);
-      })
-    );
-    const resourceB = createResource(
-      'test B',
-      new Promise(resolve => {
-        setTimeout(resolve, 1000);
-      })
-    );
-    const resourceC = createResource(
-      'test C',
-      new Promise(resolve => {
-        setTimeout(resolve, 1500);
-      })
-    );
+    const resourceA = createResource('test A', resolveAfter('value A', 500));
+    const resourceB = createResource('test B', resolveAfter('value B', 1000));
+    const resourceC = createResource('test C', resolveAfter('value C', 1500));
     const callback = jest.fn();
 
     resourceTracker.subscribe(callback);
