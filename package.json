@@ -2,7 +2,7 @@
   "name": "react-pending-resource",
   "author": "Lennart Hildebrandt",
   "description": "React hooks for loading and suspending async resources",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0-beta.4",
   "repository": "https://github.com/lennerd/react-pending-resource",
   "license": "MIT",
   "main": "dist/index.js",
