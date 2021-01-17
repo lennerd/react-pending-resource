@@ -2,46 +2,53 @@ import { act } from '@testing-library/react-hooks';
 import { createResource, ResourceAllocation } from '../Resource';
 import ResourceCache from '../ResourceCache';
 import useResource from '../useResource';
-import { renderResourceHook } from './utils';
+import { rejectAfter, renderResourceHook, resolveAfter } from './utils';
 
 describe('useResource', () => {
   it('reads from resolved promise by resource', async () => {
+    jest.useFakeTimers();
+
     expect.assertions(2);
 
-    const value = 'resolved data';
-    const promise = Promise.resolve(value);
-    const resource = createResource('resolved resource', promise);
+    const resource = createResource(
+      'resolved resource',
+      resolveAfter('resolved data', 1000)
+    );
 
     const { result, waitForNextUpdate } = renderResourceHook(() =>
       useResource(resource)
     );
 
+    await act(async () => {
+      jest.runAllTimers();
+    });
+
     await waitForNextUpdate();
     expect(result.all).toHaveLength(1);
-    expect(result.current).toBe(value);
+    expect(result.current).toBe('resolved data');
   });
 
   it('reads from resolved promise by key', async () => {
     expect.assertions(2);
 
-    const value = 'resolved data';
-    const key = 'key';
-    const promise = Promise.resolve(value);
-
     const cache = new ResourceCache();
 
-    cache.preload(key, promise);
+    cache.preload('preloaded key', resolveAfter('preloaded value', 500));
 
     const { result, waitForNextUpdate } = renderResourceHook(
-      () => useResource(key),
+      () => useResource('preloaded key'),
       {
         cache,
       }
     );
 
+    await act(async () => {
+      jest.runAllTimers();
+    });
+
     await waitForNextUpdate();
     expect(result.all).toHaveLength(1);
-    expect(result.current).toBe(value);
+    expect(result.current).toBe('preloaded value');
   });
 
   it('throws when using unknown key', () => {
@@ -54,75 +61,110 @@ describe('useResource', () => {
   });
 
   it('throws when promise got rejected', async () => {
-    expect.assertions(4);
+    jest.useFakeTimers();
 
-    const value = 'value';
-    let resource = createResource('resolved value', Promise.resolve(value));
+    expect.assertions(5);
+
+    let resource = createResource(
+      'resolved key',
+      resolveAfter('resolved value', 500)
+    );
 
     const { result, waitForNextUpdate, rerender } = renderResourceHook(() =>
       useResource(resource)
     );
 
-    await waitForNextUpdate();
-    expect(result.all).toHaveLength(1);
-    expect(result.current).toBe(value);
+    await act(async () => {
+      jest.runAllTimers();
+    });
 
-    resource = createResource('rejected value', Promise.reject(new Error()));
+    await waitForNextUpdate();
+
+    expect(result.all).toHaveLength(1);
+    expect(result.current).toBe('resolved value');
+
+    resource = createResource(
+      'rejected value',
+      rejectAfter(new Error('rejected reason'), 750)
+    );
     rerender();
 
+    await act(async () => {
+      jest.runAllTimers();
+    });
+
     await waitForNextUpdate();
+
     expect(result.all).toHaveLength(2);
     expect(result.error).toBeInstanceOf(Error);
+    expect(result.error?.message).toBe('rejected reason');
   });
 
   it('gets notified when resource gets preloaded', async () => {
-    expect.assertions(4);
+    jest.useFakeTimers();
 
-    const key = 'key';
-    const valueA = 'value A';
-    const valueB = 'value B';
-    const promiseA = Promise.resolve(valueA);
-    const promiseB = Promise.resolve(valueB);
+    expect.assertions(4);
 
     const cache = new ResourceCache();
 
-    cache.preload(key, promiseA);
+    cache.preload('key', resolveAfter('value A', 1000));
 
     const { result, waitForNextUpdate } = renderResourceHook(
-      () => useResource(key),
+      () => useResource('key'),
       {
         cache,
       }
     );
 
-    await waitForNextUpdate();
-    expect(result.all).toHaveLength(1);
-    expect(result.current).toBe(valueA);
-
     await act(async () => {
-      cache.preload(key, promiseB);
+      jest.runAllTimers();
     });
 
+    await waitForNextUpdate();
+    expect(result.all).toHaveLength(1);
+    expect(result.current).toBe('value A');
+
+    await act(async () => {
+      cache.preload('key', resolveAfter('value B', 500));
+    });
+
+    await act(async () => {
+      jest.runAllTimers();
+    });
+
+    await waitForNextUpdate();
+
     expect(result.all).toHaveLength(2);
-    expect(result.current).toBe(valueB);
+    expect(result.current).toBe('value B');
   });
 
   it('reads, attaches and detaches', async () => {
-    expect.assertions(3);
+    jest.useFakeTimers();
 
-    const promise = Promise.resolve();
-    const resource = createResource('attach detach', promise);
+    expect.assertions(5);
 
-    const { waitForNextUpdate, unmount } = renderResourceHook(() =>
+    const resource = createResource(
+      'attach detach',
+      resolveAfter('resource value', 1000)
+    );
+
+    const { result, waitForNextUpdate, unmount } = renderResourceHook(() =>
       useResource(resource)
     );
 
+    expect(result.all).toHaveLength(0);
     expect(resource.getAllocation()).toBe(ResourceAllocation.UNKNOWN);
 
+    await act(async () => {
+      jest.runAllTimers();
+    });
+
     await waitForNextUpdate();
+    expect(result.all).toHaveLength(1);
     expect(resource.getAllocation()).toBe(ResourceAllocation.ALLOCATED);
 
     unmount();
+
     expect(resource.getAllocation()).toBe(ResourceAllocation.FREED);
   });
 });

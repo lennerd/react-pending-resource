@@ -5,11 +5,13 @@ import { rejectAfter, renderResourceHook, resolveAfter } from './utils';
 
 describe('usePendingPromise', () => {
   it('resolves and reloads with new key', async () => {
+    jest.useFakeTimers();
+
     expect.assertions(7);
 
     const { result, waitForNextUpdate, rerender } = renderResourceHook(
       ({ resourceKey, value }) =>
-        usePendingPromise(resourceKey, () => Promise.resolve(value)),
+        usePendingPromise(resourceKey, () => resolveAfter(value, 1000)),
       {
         initialProps: {
           resourceKey: 'key A',
@@ -19,6 +21,10 @@ describe('usePendingPromise', () => {
     );
 
     expect(result.all).toHaveLength(0);
+
+    await act(async () => {
+      jest.runAllTimers();
+    });
 
     await waitForNextUpdate();
 
@@ -30,7 +36,9 @@ describe('usePendingPromise', () => {
     expect(result.all).toHaveLength(2);
     expect(result.current).toEqual(['value A', true]);
 
-    await waitForNextUpdate();
+    await act(async () => {
+      jest.runAllTimers();
+    });
 
     expect(result.all).toHaveLength(3);
     expect(result.current).toEqual(['value B', false]);
@@ -41,7 +49,7 @@ describe('usePendingPromise', () => {
 
     expect.assertions(3);
 
-    const { result } = renderResourceHook(() =>
+    const { result, waitForNextUpdate } = renderResourceHook(() =>
       usePendingPromise('key', () => rejectAfter(new Error(), 1000))
     );
 
@@ -50,6 +58,8 @@ describe('usePendingPromise', () => {
     await act(async () => {
       jest.runAllTimers();
     });
+
+    await waitForNextUpdate();
 
     expect(result.all).toHaveLength(1);
     expect(result.error).toBeInstanceOf(Error);

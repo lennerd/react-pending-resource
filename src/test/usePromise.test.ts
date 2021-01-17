@@ -8,10 +8,10 @@ describe('usePromise', () => {
 
     const callback = jest
       .fn()
-      .mockReturnValueOnce(Promise.resolve('first'))
-      .mockReturnValueOnce(Promise.resolve('second'))
-      .mockReturnValueOnce(Promise.resolve('third'))
-      .mockReturnValueOnce(Promise.resolve('fourth'));
+      .mockResolvedValueOnce('first')
+      .mockResolvedValueOnce('second')
+      .mockResolvedValueOnce('third')
+      .mockResolvedValueOnce('fourth');
 
     const { result, waitForNextUpdate, rerender, cache } = renderResourceHook(
       ({ resourceKey, dependency }) =>

@@ -6,15 +6,21 @@ import { rejectAfter, renderResourceHook, resolveAfter } from './utils';
 
 describe('usePendingResource', () => {
   it('waits for promise', async () => {
+    jest.useFakeTimers();
+
     expect.assertions(3);
 
     const value = 'test data';
-    const resource = createResource('test resource', Promise.resolve(value));
+    const resource = createResource('test resource', resolveAfter(value, 1000));
     const { result, waitForNextUpdate } = renderResourceHook(() =>
       usePendingResource(resource)
     );
 
     expect(result.all).toHaveLength(0);
+
+    await act(async () => {
+      jest.runAllTimers();
+    });
 
     await waitForNextUpdate();
 
