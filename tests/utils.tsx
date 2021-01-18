@@ -5,7 +5,7 @@ import {
   ResourceCacheProvider,
   ResourceConfig,
   ResourceConfigProvider,
-} from '../index';
+} from '../src';
 
 export function renderResourceHook<P, R>(
   callback: (props: P) => R,

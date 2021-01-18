@@ -1,4 +1,4 @@
-import ResourceCache from '../ResourceCache';
+import ResourceCache from '../src/ResourceCache';
 
 describe('ResourceCache', () => {
   it('preloads new resource for same key', () => {
@@ -52,8 +52,8 @@ describe('ResourceCache', () => {
     expect(resourceA).toBe(resourceB);
   });
 
-  it('cleans detached resources', () => {
-    jest.useFakeTimers();
+  it('cleans detached resources', async () => {
+    expect.assertions(3);
 
     const resourceCache = new ResourceCache();
     const resourceA = resourceCache.preload('keyA', () => Promise.resolve());
@@ -64,14 +64,16 @@ describe('ResourceCache', () => {
     resourceA.free();
     resourceB.allocate();
 
-    jest.runAllTimers();
+    await Promise.resolve();
 
-    expect(resourceCache.get('keyA')).not.toBe(resourceA);
+    expect(resourceCache.get('keyA')).toBeUndefined();
     expect(resourceCache.get('keyB')).toBe(resourceB);
     expect(resourceCache.get('keyC')).toBe(resourceC);
   });
 
-  it('notifies when preloading and invalidating', () => {
+  it('notifies when preloading and invalidating', async () => {
+    expect.assertions(5);
+
     const resourceCache = new ResourceCache();
     const callback = jest.fn();
     resourceCache.subscribe('keyA', callback);
@@ -87,6 +89,9 @@ describe('ResourceCache', () => {
     );
 
     expect(resourceAFirst).not.toBe(resourceASecond);
+
+    await Promise.resolve();
+
     expect(callback.mock.calls).toHaveLength(3);
     expect(callback.mock.calls).toEqual([
       [resourceAFirst],

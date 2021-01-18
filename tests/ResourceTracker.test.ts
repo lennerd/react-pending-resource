@@ -1,5 +1,5 @@
-import { createResource } from '../Resource';
-import ResourceTracker from '../ResourceTracker';
+import { createResource } from '../src/Resource';
+import ResourceTracker from '../src/ResourceTracker';
 import { resolveAfter } from './utils';
 
 describe('ResourceTracker', () => {

@@ -1,9 +1,9 @@
 import { renderHook } from '@testing-library/react-hooks';
 import * as React from 'react';
-import ResourceTracker from '../ResourceTracker';
+import ResourceTracker from '../src/ResourceTracker';
 import useResourceTracker, {
   ResourceTrackerProvider,
-} from '../useResourceTracker';
+} from '../src/useResourceTracker';
 
 describe('useResourceTracker', () => {
   it('uses global resource tracker', () => {

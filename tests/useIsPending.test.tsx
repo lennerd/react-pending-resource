@@ -1,9 +1,9 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import * as React from 'react';
-import { createResource } from '../Resource';
-import ResourceTracker from '../ResourceTracker';
-import useIsPending from '../useIsPending';
-import { ResourceTrackerProvider } from '../useResourceTracker';
+import { createResource } from '../src/Resource';
+import ResourceTracker from '../src/ResourceTracker';
+import useIsPending from '../src/useIsPending';
+import { ResourceTrackerProvider } from '../src/useResourceTracker';
 import { resolveAfter } from './utils';
 
 function renderIsPendingHook() {

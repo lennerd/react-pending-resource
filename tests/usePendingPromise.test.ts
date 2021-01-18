@@ -1,6 +1,6 @@
 import { act } from '@testing-library/react-hooks';
-import { ResourceCache } from '../index';
-import usePendingPromise from '../usePendingPromise';
+import { ResourceCache } from '../src';
+import usePendingPromise from '../src/usePendingPromise';
 import { rejectAfter, renderResourceHook, resolveAfter } from './utils';
 
 describe('usePendingPromise', () => {
@@ -99,16 +99,14 @@ describe('usePendingPromise', () => {
 
     rerender({ dependency: 'b' });
 
-    // The hook is called 3 times because the invalidation caused by the changed
-    // dependency is also causing a second render.
-    expect(result.all).toHaveLength(3);
+    expect(result.all).toHaveLength(2);
     expect(result.current).toEqual(['value from callback A', true]);
 
     await act(async () => {
       jest.runAllTimers();
     });
 
-    expect(result.all).toHaveLength(4);
+    expect(result.all).toHaveLength(3);
     expect(result.current).toEqual(['value from callback B', false]);
   });
 
@@ -147,14 +145,14 @@ describe('usePendingPromise', () => {
 
     // The hook is called 3 times because the invalidation caused by the changed
     // dependency is also causing a second render.
-    expect(result.all).toHaveLength(3);
+    expect(result.all).toHaveLength(2);
     expect(result.current).toEqual(['value with deps A', true]);
 
     await act(async () => {
       jest.runAllTimers();
     });
 
-    expect(result.all).toHaveLength(4);
+    expect(result.all).toHaveLength(3);
     expect(result.current).toEqual(['value with deps B', false]);
   });
 

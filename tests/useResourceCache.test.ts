@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react-hooks';
-import ResourceCache from '../ResourceCache';
-import useResourceCache from '../useResourceCache';
+import ResourceCache from '../src/ResourceCache';
+import useResourceCache from '../src/useResourceCache';
 import { renderResourceHook } from './utils';
 
 describe('useResourceCache', () => {

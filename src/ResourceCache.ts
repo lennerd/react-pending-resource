@@ -3,6 +3,8 @@ import Resource, {
   ResourceAllocation,
   ResourceKey,
 } from './Resource';
+import batch from './utils/batch';
+import schedule from './utils/schedule';
 
 export interface ResourceCacheInvalidationCallback<T = any> {
   (resource: Resource<T> | undefined): void;
@@ -15,17 +17,6 @@ interface ResourceCacheEntry<T = any> {
 
 export function createResourceCacheHash(key: ResourceKey): string {
   return JSON.stringify(key);
-}
-
-function batch<T, A extends any[]>(
-  callback: (this: T, ...args: A) => void
-): (this: T, ...args: A) => void {
-  let timeoutRef: number;
-
-  return function(this: T, ...args: A) {
-    clearTimeout(timeoutRef);
-    timeoutRef = setTimeout(() => callback.call(this, ...args));
-  };
 }
 
 export default class ResourceCache {
@@ -120,10 +111,13 @@ export default class ResourceCache {
 
   private scheduleNotification(cacheHash: string): void {
     const resource = this.cache.get(cacheHash)?.resource;
-    const subscribers = this.subscribers.get(cacheHash);
 
-    subscribers?.forEach(callback => {
-      callback(resource);
+    schedule(() => {
+      const subscribers = this.subscribers.get(cacheHash);
+
+      subscribers?.forEach(callback => {
+        callback(resource);
+      });
     });
   }
 

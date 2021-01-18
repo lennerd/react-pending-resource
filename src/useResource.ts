@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import isPromise from './utils/isPromise';
 import useForceUpdate from './utils/useForceUpdate';
 import Resource, { isValidResourceKey, ResourceKey } from './Resource';
@@ -96,13 +96,19 @@ function useResourceInvalidation(
 ): void {
   const resourceCache = useResourceCache();
   const { key: resourceKey } = resource;
+  const resourceRef = useRef<Resource<any>>();
+  resourceRef.current = resource;
 
   useEffect(() => {
     if (resourceKey == null) {
       return;
     }
 
-    resourceCache.subscribe(resourceKey, callback);
+    resourceCache.subscribe(resourceKey, resource => {
+      if (resourceRef.current !== resource) {
+        callback();
+      }
+    });
 
     return () => {
       resourceCache.unsubscribe(resourceKey, callback);

@@ -1,7 +1,7 @@
 import { act } from '@testing-library/react-hooks';
-import { createResource } from '../Resource';
-import ResourceCache from '../ResourceCache';
-import usePendingResource from '../usePendingResource';
+import { createResource } from '../src/Resource';
+import ResourceCache from '../src/ResourceCache';
+import usePendingResource from '../src/usePendingResource';
 import { rejectAfter, renderResourceHook, resolveAfter } from './utils';
 
 describe('usePendingResource', () => {

@@ -1,5 +1,5 @@
 import { act } from '@testing-library/react-hooks';
-import usePromise from '../usePromise';
+import usePromise from '../src/usePromise';
 import { renderResourceHook } from './utils';
 
 describe('usePromise', () => {
