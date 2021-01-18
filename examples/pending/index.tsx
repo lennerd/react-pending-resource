@@ -1,6 +1,6 @@
-import { usePendingPromise, usePendingResource } from 'react-pending-resource';
-import ReactDOM from 'react-dom';
-import React from 'react';
+import { usePendingPromise } from "react-pending-resource";
+import ReactDOM from "react-dom";
+import React from "react";
 
 interface User {
   name: string;
@@ -10,33 +10,36 @@ interface User {
 
 const users: User[] = [
   {
-    name: 'User 1',
+    name: "User 1",
     age: 21,
-    country: 'Poland',
+    country: "Poland"
   },
   {
-    name: 'User 2',
+    name: "User 2",
     age: 42,
-    country: 'Sweden',
+    country: "Sweden"
   },
   {
-    name: 'User 3',
+    name: "User 3",
     age: 24,
-    country: 'Spain',
+    country: "Spain"
   },
   {
-    name: 'User 4',
+    name: "User 4",
     age: 12,
-    country: 'Italy',
-  },
+    country: "Italy"
+  }
 ];
 
 // Some function to more some async fetch API call …
-function fetchUser(id: number): Promise<User> {
-  return new Promise(resolve => {
+function fetchUser(id: number): Promise<{ user: User; randomNumber: number }> {
+  return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(users[id - 1]);
-    }, 250 + Math.random() * 1000);
+      resolve({
+        user: users[id - 1],
+        randomNumber: Math.round(10 * Math.random())
+      });
+    }, Math.round(250 + Math.random() * 1000));
   });
 }
 
@@ -44,14 +47,33 @@ interface ProfileProps {
   userId: number;
 }
 
-console.log(usePendingResource);
-
 function Profile({ userId }: ProfileProps) {
-  const [user] = usePendingPromise(["user", userId], () => fetchUser(userId), {
-    initialRender: false
-  });
+  const [{ user, randomNumber }, isLoading] = usePendingPromise(
+    ["user", userId],
+    () => fetchUser(userId),
+    {
+      deps: [userId],
+      timeToSuspense: 500
+    }
+  );
 
-  return <div>{user.name}</div>;
+  return (
+    <div>
+      {user.name} {randomNumber} {isLoading && <span>(Loading …)</span>}
+    </div>
+  );
+}
+
+function Test() {
+  const [{ user, randomNumber }] = usePendingPromise(["user", 1], () =>
+    fetchUser(1)
+  );
+
+  return (
+    <div>
+      {user.name} {randomNumber}
+    </div>
+  );
 }
 
 function App() {
@@ -68,9 +90,11 @@ function App() {
       </p>
       <React.Suspense fallback="Loading …">
         <Profile userId={userId} />
+        <hr />
+        <Test />
       </React.Suspense>
     </>
   );
 }
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(<App />, document.getElementById("root"));
